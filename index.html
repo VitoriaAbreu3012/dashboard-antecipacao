@@ -82,51 +82,51 @@
                 </div>
             </div>
 
-            <!-- Cards de KPI (NOVO DESIGN) -->
+            <!-- Cards de KPI -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
                 
                 <!-- Card 1: Valor Antecipado -->
-                <div class="bg-primary text-white rounded-2xl p-6 shadow-md flex justify-between items-center">
-                    <div>
-                        <p class="text-blue-100 text-sm font-medium mb-1">Valor Antecipado Total</p>
-                        <h3 id="kpi-tpv" class="text-2xl lg:text-3xl font-bold">R$ 0</h3>
+                <div class="bg-primary text-white rounded-2xl p-6 shadow-md flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-4">
+                        <p class="text-blue-100 text-sm font-medium">Valor Antecipado Total</p>
+                        <div class="bg-white/20 p-2.5 rounded-xl flex items-center justify-center">
+                            <i class="fa-solid fa-money-bills text-lg"></i>
+                        </div>
                     </div>
-                    <div class="bg-white/20 p-3 rounded-xl flex items-center justify-center">
-                        <i class="fa-solid fa-money-bills text-xl"></i>
-                    </div>
+                    <h3 id="kpi-tpv" class="text-2xl lg:text-3xl font-bold truncate" title="Valor Total">R$ 0</h3>
                 </div>
                 
                 <!-- Card 2: Ticket Médio -->
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex justify-between items-center">
-                    <div>
-                        <p class="text-slate-500 text-sm font-medium mb-1">Ticket Médio Geral</p>
-                        <h3 id="kpi-ticket" class="text-2xl lg:text-3xl font-bold text-slate-800">R$ 0</h3>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-4">
+                        <p class="text-slate-500 text-sm font-medium">Ticket Médio Geral</p>
+                        <div class="bg-slate-50 p-2.5 rounded-xl flex items-center justify-center border border-slate-100">
+                            <i class="fa-solid fa-arrow-trend-up text-lg text-primary"></i>
+                        </div>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded-xl flex items-center justify-center border border-slate-100">
-                        <i class="fa-solid fa-arrow-trend-up text-xl text-primary"></i>
-                    </div>
+                    <h3 id="kpi-ticket" class="text-2xl lg:text-3xl font-bold text-slate-800 truncate">R$ 0</h3>
                 </div>
 
                 <!-- Card 3: Vidas Antecipando -->
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex justify-between items-center">
-                    <div>
-                        <p class="text-slate-500 text-sm font-medium mb-1">Vidas Antecipando</p>
-                        <h3 id="kpi-vidas-ant" class="text-2xl lg:text-3xl font-bold text-slate-800">0</h3>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-4">
+                        <p class="text-slate-500 text-sm font-medium">Vidas Antecipando</p>
+                        <div class="bg-slate-50 p-2.5 rounded-xl flex items-center justify-center border border-slate-100">
+                            <i class="fa-solid fa-users text-lg text-primary"></i>
+                        </div>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded-xl flex items-center justify-center border border-slate-100">
-                        <i class="fa-solid fa-users text-xl text-primary"></i>
-                    </div>
+                    <h3 id="kpi-vidas-ant" class="text-2xl lg:text-3xl font-bold text-slate-800 truncate">0</h3>
                 </div>
 
                 <!-- Card 4: Penetração -->
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex justify-between items-center">
-                    <div>
-                        <p class="text-slate-500 text-sm font-medium mb-1">Penetração Média</p>
-                        <h3 id="kpi-penetracao" class="text-2xl lg:text-3xl font-bold text-slate-800">0%</h3>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-4">
+                        <p class="text-slate-500 text-sm font-medium">Penetração Média</p>
+                        <div class="bg-slate-50 p-2.5 rounded-xl flex items-center justify-center border border-slate-100">
+                            <i class="fa-solid fa-chart-pie text-lg text-primary"></i>
+                        </div>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded-xl flex items-center justify-center border border-slate-100">
-                        <i class="fa-solid fa-chart-pie text-xl text-primary"></i>
-                    </div>
+                    <h3 id="kpi-penetracao" class="text-2xl lg:text-3xl font-bold text-slate-800 truncate">0%</h3>
                 </div>
 
             </div>
