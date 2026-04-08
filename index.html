@@ -1010,7 +1010,6 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
         let dadosGlobais = [];
         let chartInstance = null;
         
-        // Estado atual do gráfico (Qual métrica está sendo mostrada)
         let currentRankingMetric = 'valor'; 
         let currentChartData = [];
 
@@ -1082,7 +1081,7 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
             });
 
             const dadosFinais = Object.values(empresasAgrupadas);
-            currentChartData = dadosFinais; // Salva para usar no gráfico interativo
+            currentChartData = dadosFinais;
 
             let totalTpv = 0, totalElegiveis = 0, totalAntecipando = 0;
             dadosFinais.forEach(d => {
@@ -1121,7 +1120,6 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
                 `;
             });
 
-            // Reseta o botão para 'valor' sempre que abrir um novo setor
             changeRankingMetric('valor'); 
         }
 
@@ -1130,11 +1128,9 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
             document.getElementById('home-view').classList.remove('hidden');
         }
 
-        // Função que muda a métrica do gráfico e pinta os botões
         function changeRankingMetric(metric) {
             currentRankingMetric = metric;
             
-            // Atualiza as cores dos botões
             const btns = ['valor', 'vidas', 'penetracao', 'ticket'];
             btns.forEach(b => {
                 const el = document.getElementById('btn-rank-' + b);
@@ -1148,11 +1144,9 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
             renderChart();
         }
 
-        // Função que desenha o gráfico baseado na métrica escolhida
         function renderChart() {
             let dados = currentChartData;
             
-            // Calcula as métricas para cada empresa
             let dadosMapeados = dados.map(d => {
                 let pen = d.vidas_elegiveis > 0 ? (d.vidas_antecipando / d.vidas_elegiveis) * 100 : 0;
                 let tkt = d.vidas_antecipando > 0 ? d.tpv / d.vidas_antecipando : 0;
@@ -1165,16 +1159,12 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
                 };
             });
 
-            // Filtra os zerados para não poluir o gráfico
             dadosMapeados = dadosMapeados.filter(d => d[currentRankingMetric] > 0);
-
-            // Ordena do maior para o menor baseado na métrica escolhida
             dadosMapeados.sort((a, b) => b[currentRankingMetric] - a[currentRankingMetric]);
 
             const labels = dadosMapeados.map(d => d.nome);
             const valores = dadosMapeados.map(d => d[currentRankingMetric]);
 
-            // Configura o formato do texto dependendo da métrica
             let labelText = '';
             let formatCallback = (val) => val;
 
@@ -1195,9 +1185,8 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
             const ctx = document.getElementById('rankingChart').getContext('2d');
             if(chartInstance) chartInstance.destroy();
 
-            // Altura dinâmica para não espremer os nomes
             const chartContainer = document.getElementById('chart-container');
-            const alturaCalculada = Math.max(500, labels.length * 30); // 30px por barra
+            const alturaCalculada = Math.max(500, labels.length * 30); 
             chartContainer.style.height = alturaCalculada + 'px';
 
             chartInstance = new Chart(ctx, {
@@ -1230,7 +1219,6 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
                             grid: { display: false },
                             ticks: {
                                 callback: function(value) {
-                                    // Formatação inteligente do eixo X
                                     if (currentRankingMetric === 'valor' || currentRankingMetric === 'ticket') {
                                         return 'R$ ' + (value >= 1000 ? (value/1000) + 'k' : value);
                                     } else if (currentRankingMetric === 'penetracao') {
@@ -1244,7 +1232,7 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
                             grid: { display: false }, 
                             ticks: { 
                                 font: { size: 10 },
-                                autoSkip: false // Força a mostrar todos os nomes
+                                autoSkip: false 
                             } 
                         }
                     }
