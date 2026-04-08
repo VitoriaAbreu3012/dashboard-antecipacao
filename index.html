@@ -1033,6 +1033,7 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
                 if(obj.Mes) dadosGlobais.push(obj);
             }
 
+            // Preenche o filtro de meses
             const mesesUnicos = [...new Set(dadosGlobais.map(d => d.Mes))].sort().reverse();
             const selectMes = document.getElementById('mes-selector');
             selectMes.innerHTML = '<option value="todos">Todos os Meses</option>';
@@ -1041,7 +1042,16 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
                 if(mes) selectMes.innerHTML += `<option value="${mes}">${mes}</option>`;
             });
 
-            if(mesesUnicos.length > 0 && mesesUnicos[0]) {
+            // Descobre o mês atual (formato YYYY-MM)
+            const hoje = new Date();
+            const ano = hoje.getFullYear();
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            const mesAtualFormatado = `${ano}-${mes}`;
+
+            // Tenta selecionar o mês atual. Se não existir na base, pega o mais recente.
+            if (mesesUnicos.includes(mesAtualFormatado)) {
+                selectMes.value = mesAtualFormatado;
+            } else if (mesesUnicos.length > 0 && mesesUnicos[0]) {
                 selectMes.value = mesesUnicos[0];
             }
         }
