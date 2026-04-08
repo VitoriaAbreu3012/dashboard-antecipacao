@@ -13,7 +13,7 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#4a84f6',
+                        primary: '#11C76F',
                         secondary: '#333e4f',
                         bgLight: '#f4f6f9'
                     }
@@ -47,7 +47,7 @@
             <div onclick="openDashboard('public')" class="card-hover bg-primary text-white rounded-2xl p-10 text-center shadow-lg">
                 <i class="fa-solid fa-landmark text-4xl mb-4 opacity-80"></i>
                 <h2 class="text-2xl font-bold mb-2">Setor Público</h2>
-                <p class="text-blue-100 text-sm">Análise de praças públicas</p>
+                <p class="text-green-100 text-sm">Análise de praças públicas</p>
             </div>
             <div onclick="openDashboard('private')" class="card-hover bg-secondary text-white rounded-2xl p-10 text-center shadow-lg">
                 <i class="fa-solid fa-building text-4xl mb-4 opacity-80"></i>
@@ -77,7 +77,7 @@
                     <h2 class="text-3xl font-bold text-slate-900 mb-1">Reporting Diário - <span id="dash-subtitle">Setor</span></h2>
                     <p class="text-slate-500">Visão 360 Histórica das Praças/Empresas</p>
                 </div>
-                <div class="bg-blue-50 text-primary px-4 py-2 rounded-lg font-bold border border-blue-100">
+                <div class="bg-green-50 text-primary px-4 py-2 rounded-lg font-bold border border-green-100">
                     Mês: <span id="dash-mes-label">Todos</span>
                 </div>
             </div>
@@ -87,7 +87,7 @@
                 
                  <!-- Card 1: Valor Antecipado -->
                 <div class="bg-primary text-white rounded-2xl p-6 shadow-md">
-                    <p class="text-blue-100 text-sm font-medium mb-2">Valor Antecipado Total</p>
+                    <p class="text-green-100 text-sm font-medium mb-2">Valor Antecipado Total</p>
                     <h3 id="kpi-tpv" class="text-xl lg:text-2xl font-bold" title="Valor Total">R$ 0</h3>
                 </div>
 
@@ -1191,7 +1191,7 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
                     datasets: [{
                         label: labelText,
                         data: valores,
-                        backgroundColor: '#4a84f6',
+                        backgroundColor: '#11C76F',
                         borderRadius: 4
                     }]
                 },
