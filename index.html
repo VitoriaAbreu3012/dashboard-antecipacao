@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Antecipação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4a84f6',
+                        secondary: '#333e4f',
+                        bgLight: '#f4f6f9'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        .card-hover { transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- TELA 1: MENU INICIAL -->
+    <div id="home-view" class="min-h-screen flex flex-col items-center justify-center p-6">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold mb-3 text-slate-900">Dashboards de Lucas</h1>
+            <p class="text-slate-500 text-lg mb-4">Selecione o tipo de dashboard para visualizar.</p>
+            
+            <div class="bg-white p-4 rounded-xl shadow-sm inline-block border border-slate-200">
+                <label class="text-sm font-bold text-slate-600 mr-2">Mês de Referência:</label>
+                <select id="mes-selector" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary p-2">
+                    <!-- Opções preenchidas via JS -->
+                </select>
+            </div>
+        </div>
+
+        <div id="menu-cards" class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl w-full">
+            <div onclick="openDashboard('public')" class="card-hover bg-primary text-white rounded-2xl p-10 text-center shadow-lg">
+                <i class="fa-solid fa-landmark text-4xl mb-4 opacity-80"></i>
+                <h2 class="text-2xl font-bold mb-2">Setor Público</h2>
+                <p class="text-blue-100 text-sm">Análise de praças públicas</p>
+            </div>
+            <div onclick="openDashboard('private')" class="card-hover bg-secondary text-white rounded-2xl p-10 text-center shadow-lg">
+                <i class="fa-solid fa-building text-4xl mb-4 opacity-80"></i>
+                <h2 class="text-2xl font-bold mb-2">Setor Privado</h2>
+                <p class="text-slate-300 text-sm">Análise de empresas privadas</p>
+            </div>
+            <div onclick="openDashboard('grupo')" class="card-hover bg-white text-slate-800 border border-slate-200 rounded-2xl p-10 text-center shadow-lg">
+                <i class="fa-solid fa-layer-group text-4xl mb-4 text-primary opacity-80"></i>
+                <h2 class="text-2xl font-bold mb-2">Grupo</h2>
+                <p class="text-slate-500 text-sm">Análise de contas do grupo</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA 2: DASHBOARD -->
+    <div id="dashboard-view" class="hidden min-h-screen flex flex-col">
+        <header class="bg-white shadow-sm px-8 py-4 flex justify-between items-center sticky top-0 z-10">
+            <h1 id="dash-title" class="text-xl font-bold text-primary">Dashboard</h1>
+            <button onclick="goHome()" class="text-slate-500 hover:text-slate-800 font-medium flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> Voltar ao Menu
+            </button>
+        </header>
+
+        <main class="flex-1 p-8 max-w-7xl mx-auto w-full">
+            <div class="mb-8 flex justify-between items-end">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-900 mb-1">Reporting Diário - <span id="dash-subtitle">Setor</span></h2>
+                    <p class="text-slate-500">Visão 360 Histórica das Praças/Empresas</p>
+                </div>
+                <div class="bg-blue-50 text-primary px-4 py-2 rounded-lg font-bold border border-blue-100">
+                    Mês: <span id="dash-mes-label">Todos</span>
+                </div>
+            </div>
+
+            <!-- Cards de KPI -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                <div class="bg-primary text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
+                    <p class="text-blue-100 text-sm font-medium mb-1">Valor Antecipado Total</p>
+                    <h3 id="kpi-tpv" class="text-3xl font-bold">R$ 0</h3>
+                    <i class="fa-solid fa-money-bill-wave absolute bottom-4 right-6 text-4xl opacity-20"></i>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <p class="text-slate-500 text-sm font-medium mb-1">Ticket Médio Geral</p>
+                    <h3 id="kpi-ticket" class="text-3xl font-bold text-slate-800">R$ 0</h3>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <p class="text-slate-500 text-sm font-medium mb-1">Vidas Antecipando</p>
+                    <h3 id="kpi-vidas-ant" class="text-3xl font-bold text-slate-800">0</h3>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <p class="text-slate-500 text-sm font-medium mb-1">Penetração Média</p>
+                    <h3 id="kpi-penetracao" class="text-3xl font-bold text-primary">0%</h3>
+                </div>
+            </div>
+
+            <!-- Penetração por Praça -->
+            <h3 class="text-xl font-bold text-slate-800 mb-4 text-center">Penetração por Praça / Empresa</h3>
+            <div id="cards-empresas" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10"></div>
+
+            <!-- Gráfico Interativo -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                
+                <!-- Cabeçalho do Gráfico com os Botões -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-1">Ranking de Praças</h3>
+                        <p class="text-slate-500 text-sm">Compare o desempenho por diferentes métricas.</p>
+                    </div>
+                    
+                    <!-- Botões de Filtro -->
+                    <div class="bg-slate-100 p-1 rounded-full inline-flex text-sm font-medium">
+                        <button id="btn-rank-valor" onclick="changeRankingMetric('valor')" class="px-4 py-1.5 rounded-full bg-primary text-white shadow-sm transition-all">Valor</button>
+                        <button id="btn-rank-vidas" onclick="changeRankingMetric('vidas')" class="px-4 py-1.5 rounded-full text-slate-500 hover:text-slate-900 transition-all">Vidas</button>
+                        <button id="btn-rank-penetracao" onclick="changeRankingMetric('penetracao')" class="px-4 py-1.5 rounded-full text-slate-500 hover:text-slate-900 transition-all">Penetração</button>
+                        <button id="btn-rank-ticket" onclick="changeRankingMetric('ticket')" class="px-4 py-1.5 rounded-full text-slate-500 hover:text-slate-900 transition-all">Ticket Médio</button>
+                    </div>
+                </div>
+
+                <!-- Container do Gráfico (Altura Dinâmica) -->
+                <div id="chart-container" class="relative w-full" style="height: 500px;">
+                    <canvas id="rankingChart"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // =========================================================================
+        // DADOS BRUTOS: Cole os dados do Excel/Databricks entre as crases (``) abaixo.
+        // =========================================================================
+        const rawData = `
+Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antecipando	TPV_Transacionado	Ticket_Medio
+2026-01	Eldorado Brasil	grupo	2923	0	0	0	0	0
+2026-01	Flora Produtos de Higiene e Limpeza	grupo	4022	2474	2474	719	143980,86	200,25
+2026-01	Grupo J&F	grupo	1739	1208	1208	159	168689,22	1060,94
+2026-01	Instituto Germinare	grupo	945	470	470	47	25501,92	542,59
+2026-01	J&F MINERACAO	grupo	3670	1292	1291	328	104967,69	320,02
+2026-01	J&F PAR	grupo	6318	4496	4495	696	853191,94	1225,85
+2026-01	JBS	grupo	54505	45449	45423	21212	13550136,56	638,8
+2026-01	LIONX	grupo	9	6	6	0	0	0
+2026-01	Norte Tech	grupo	3592	2	2	0	0	0
+2026-01	Ovos Mantiqueira	grupo	1125	762	752	268	125074,57	466,7
+2026-01	Prima Foods S.A.	grupo	3084	1981	1866	591	122754,58	207,71
+2026-01	SEARA	grupo	89011	72095	71181	25161	12362342,6	491,33
+2026-02	Eldorado Brasil	grupo	5963	0	0	0	0	0
+2026-02	Flora Produtos de Higiene e Limpeza	grupo	4098	2442	2442	662	116287,63	175,66
+2026-02	Grupo J&F	grupo	1781	1224	1224	205	221481,83	1080,4
+2026-02	Instituto Germinare	grupo	1051	468	468	43	29605,34	688,5
+2026-02	J&F MINERACAO	grupo	3718	1371	1370	303	77817,07	256,82
+2026-02	J&F PAR	grupo	6433	4622	4622	664	751665,87	1132,03
+2026-02	JBS	grupo	55896	46017	46009	21461	12948850,48	603,37
+2026-02	LIONX	grupo	26	0	0	0	0	0
+2026-02	Norte Tech	grupo	3732	3277	3262	408	65399,95	160,29
+2026-02	Ovos Mantiqueira	grupo	1177	783	772	272	128970,79	474,16
+2026-02	Prima Foods S.A.	grupo	3207	1989	1878	595	119021,41	200,04
+2026-02	SEARA	grupo	91404	72393	71640	25503	12560754,69	492,52
+2026-03	Eldorado Brasil	grupo	5963	0	0	0	0	0
+2026-03	Flora Produtos de Higiene e Limpeza	grupo	4215	2533	2533	705	124001,93	175,89
+2026-03	Grupo J&F	grupo	1880	1221	1220	156	137716,98	882,8
+2026-03	Instituto Germinare	grupo	1077	468	468	42	31033,83	738,9
+2026-03	J&F MINERACAO	grupo	3777	1376	1375	206	48420,41	235,05
+2026-03	J&F PAR	grupo	6559	4765	4765	780	929239,5	1191,33
+2026-03	JBS	grupo	57224	47459	47452	21797	12588785,3	577,55
+2026-03	LIONX	grupo	39	24	24	0	0	0
+2026-03	Norte Tech	grupo	4153	3373	3364	945	411957,97	435,93
+2026-03	Ovos Mantiqueira	grupo	1190	823	813	289	132581,45	458,76
+2026-03	Prima Foods S.A.	grupo	3303	1996	1900	564	118866,07	210,76
+2026-03	SEARA	grupo	94698	75155	75096	26164	13255062,34	506,61
+2026-04	Eldorado Brasil	grupo	6212	5412	5409	458	195747,06	427,4
+2026-04	Flora Produtos de Higiene e Limpeza	grupo	4215	2551	2551	162	8325,61	51,39
+2026-04	Grupo J&F	grupo	1881	1275	1274	120	78015,3	650,13
+2026-04	Instituto Germinare	grupo	1077	467	467	19	6687,05	351,95
+2026-04	J&F MINERACAO	grupo	3777	1454	1453	116	18077,21	155,84
+2026-04	J&F PAR	grupo	6597	4873	4873	209	43535,42	208,3
+2026-04	JBS	grupo	57263	48016	48004	15088	5131998,92	340,14
+2026-04	LIONX	grupo	45	33	33	1	979,92	979,92
+2026-04	Norte Tech	grupo	4153	3459	3451	813	226801,83	278,97
+2026-04	Ovos Mantiqueira	grupo	1190	833	819	164	44587,29	271,87
+2026-04	Prima Foods S.A.	grupo	3305	2002	1908	391	46220,61	118,21
+2026-04	SEARA	grupo	94891	76967	76900	17544	5295408,11	301,84
+2026-05	Eldorado Brasil	grupo	6212	0	0	0	0	0
+2026-05	Flora Produtos de Higiene e Limpeza	grupo	4215	0	0	0	0	0
+2026-05	Grupo J&F	grupo	1881	0	0	0	0	0
+2026-05	Instituto Germinare	grupo	1077	0	0	0	0	0
+2026-05	J&F MINERACAO	grupo	3777	0	0	0	0	0
+2026-05	J&F PAR	grupo	6597	0	0	0	0	0
+2026-05	JBS	grupo	57263	0	0	0	0	0
+2026-05	LIONX	grupo	45	0	0	0	0	0
+2026-05	Norte Tech	grupo	4153	0	0	0	0	0
+2026-05	Ovos Mantiqueira	grupo	1190	0	0	0	0	0
+2026-05	Prima Foods S.A.	grupo	3305	0	0	0	0	0
+2026-05	SEARA	grupo	94891	0	0	0	0	0
+2026-06	Eldorado Brasil	grupo	6212	0	0	0	0	0
+2026-06	Flora Produtos de Higiene e Limpeza	grupo	4215	0	0	0	0	0
+2026-06	Grupo J&F	grupo	1881	0	0	0	0	0
+2026-06	Instituto Germinare	grupo	1077	0	0	0	0	0
+2026-06	J&F MINERACAO	grupo	3777	0	0	0	0	0
+2026-06	J&F PAR	grupo	6597	0	0	0	0	0
+2026-06	JBS	grupo	57263	0	0	0	0	0
+2026-06	LIONX	grupo	45	0	0	0	0	0
+2026-06	Norte Tech	grupo	4153	0	0	0	0	0
+2026-06	Ovos Mantiqueira	grupo	1190	0	0	0	0	0
+2026-06	Prima Foods S.A.	grupo	3305	0	0	0	0	0
+2026-06	SEARA	grupo	94891	0	0	0	0	0
+2026-07	Eldorado Brasil	grupo	6212	0	0	0	0	0
+2026-07	Flora Produtos de Higiene e Limpeza	grupo	4215	0	0	0	0	0
+2026-07	Grupo J&F	grupo	1881	0	0	0	0	0
+2026-07	Instituto Germinare	grupo	1077	0	0	0	0	0
+2026-07	J&F MINERACAO	grupo	3777	0	0	0	0	0
+2026-07	J&F PAR	grupo	6597	0	0	0	0	0
+2026-07	JBS	grupo	57263	0	0	0	0	0
+2026-07	LIONX	grupo	45	0	0	0	0	0
+2026-07	Norte Tech	grupo	4153	0	0	0	0	0
+2026-07	Ovos Mantiqueira	grupo	1190	0	0	0	0	0
+2026-07	Prima Foods S.A.	grupo	3305	0	0	0	0	0
+2026-07	SEARA	grupo	94891	0	0	0	0	0
+2026-08	Eldorado Brasil	grupo	6212	0	0	0	0	0
+2026-08	Flora Produtos de Higiene e Limpeza	grupo	4215	0	0	0	0	0
+2026-08	Grupo J&F	grupo	1881	0	0	0	0	0
+2026-08	Instituto Germinare	grupo	1077	0	0	0	0	0
+2026-08	J&F MINERACAO	grupo	3777	0	0	0	0	0
+2026-08	J&F PAR	grupo	6597	0	0	0	0	0
+2026-08	JBS	grupo	57263	0	0	0	0	0
+2026-08	LIONX	grupo	45	0	0	0	0	0
+2026-08	Norte Tech	grupo	4153	0	0	0	0	0
+2026-08	Ovos Mantiqueira	grupo	1190	0	0	0	0	0
+2026-08	Prima Foods S.A.	grupo	3305	0	0	0	0	0
+2026-08	SEARA	grupo	94891	0	0	0	0	0
+2026-09	Eldorado Brasil	grupo	6212	0	0	0	0	0
+2026-09	Flora Produtos de Higiene e Limpeza	grupo	4215	0	0	0	0	0
+2026-09	Grupo J&F	grupo	1881	0	0	0	0	0
+2026-09	Instituto Germinare	grupo	1077	0	0	0	0	0
+2026-09	J&F MINERACAO	grupo	3777	0	0	0	0	0
+2026-09	J&F PAR	grupo	6597	0	0	0	0	0
+2026-09	JBS	grupo	57263	0	0	0	0	0
+2026-09	LIONX	grupo	45	0	0	0	0	0
+2026-09	Norte Tech	grupo	4153	0	0	0	0	0
+2026-09	Ovos Mantiqueira	grupo	1190	0	0	0	0	0
+2026-09	Prima Foods S.A.	grupo	3305	0	0	0	0	0
+2026-09	SEARA	grupo	94891	0	0	0	0	0
+2026-10	Eldorado Brasil	grupo	6212	0	0	0	0	0
+2026-10	Flora Produtos de Higiene e Limpeza	grupo	4215	0	0	0	0	0
+2026-10	Grupo J&F	grupo	1881	0	0	0	0	0
+2026-10	Instituto Germinare	grupo	1077	0	0	0	0	0
+2026-10	J&F MINERACAO	grupo	3777	0	0	0	0	0
+2026-10	J&F PAR	grupo	6597	0	0	0	0	0
+2026-10	JBS	grupo	57263	0	0	0	0	0
+2026-10	LIONX	grupo	45	0	0	0	0	0
+2026-10	Norte Tech	grupo	4153	0	0	0	0	0
+2026-10	Ovos Mantiqueira	grupo	1190	0	0	0	0	0
+2026-10	Prima Foods S.A.	grupo	3305	0	0	0	0	0
+2026-10	SEARA	grupo	94891	0	0	0	0	0
+2026-11	Eldorado Brasil	grupo	6212	0	0	0	0	0
+2026-11	Flora Produtos de Higiene e Limpeza	grupo	4215	0	0	0	0	0
+2026-11	Grupo J&F	grupo	1881	0	0	0	0	0
+2026-11	Instituto Germinare	grupo	1077	0	0	0	0	0
+2026-11	J&F MINERACAO	grupo	3777	0	0	0	0	0
+2026-11	J&F PAR	grupo	6597	0	0	0	0	0
+2026-11	JBS	grupo	57263	0	0	0	0	0
+2026-11	LIONX	grupo	45	0	0	0	0	0
+2026-11	Norte Tech	grupo	4153	0	0	0	0	0
+2026-11	Ovos Mantiqueira	grupo	1190	0	0	0	0	0
+2026-11	Prima Foods S.A.	grupo	3305	0	0	0	0	0
+2026-11	SEARA	grupo	94891	0	0	0	0	0
+2026-12	Eldorado Brasil	grupo	6212	0	0	0	0	0
+2026-12	Flora Produtos de Higiene e Limpeza	grupo	4215	0	0	0	0	0
+2026-12	Grupo J&F	grupo	1881	0	0	0	0	0
+2026-12	Instituto Germinare	grupo	1077	0	0	0	0	0
+2026-12	J&F MINERACAO	grupo	3777	0	0	0	0	0
+2026-12	J&F PAR	grupo	6597	0	0	0	0	0
+2026-12	JBS	grupo	57263	0	0	0	0	0
+2026-12	LIONX	grupo	45	0	0	0	0	0
+2026-12	Norte Tech	grupo	4153	0	0	0	0	0
+2026-12	Ovos Mantiqueira	grupo	1190	0	0	0	0	0
+2026-12	Prima Foods S.A.	grupo	3305	0	0	0	0	0
+2026-12	SEARA	grupo	94891	0	0	0	0	0
+2026-01	2CLIX TECNOLOGIA LTDA	private	17	14	14	5	3205,56	641,11
+2026-01	ATACADÃO DIA A DIA	private	6393	0	0	0	0	0
+2026-01	AUTODEFESA BRASIL	private	257	173	173	51	23026,28	451,5
+2026-01	Abramides	private	274	251	250	46	18128,79	394,1
+2026-01	CIRO MOTOS	private	338	338	208	47	26755,52	569,27
+2026-01	Chinezinho - CORREA DUARTE PARTICIPACOES	private	551	376	331	147	28283,62	192,41
+2026-01	EMERSON APARECIDO	private	6	5	5	0	0	0
+2026-01	ESPÁRTACO E GUARDED	private	1921	1539	822	154	43542,56	282,74
+2026-01	GD7	private	462	419	252	43	22613,47	525,89
+2026-01	Global	private	2106	26	26	6	6503,82	1083,97
+2026-01	Grupo ZA	private	24	24	17	11	15585,5	1416,86
+2026-01	Guanabara	private	2555	2023	1781	52	11993,25	230,64
+2026-01	HOWDEN BRASIL	private	136	135	79	5	1580,27	316,05
+2026-01	HULAND, CASTRO ALVES, LINHARES & BARROS LEAL ADVOGADOS	private	55	0	0	0	0	0
+2026-01	Lojas rede	private	1703	1395	975	324	117285,09	361,99
+2026-01	MERCADO VIOLETA	private	1696	1496	1486	496	106869,44	215,46
+2026-01	Midea	private	1629	1629	899	102	47084,9	461,62
+2026-01	ONCOCLÍNICAS	private	6823	3570	1999	136	50127,15	368,58
+2026-01	ONFLY	private	599	589	522	39	32121,96	823,64
+2026-01	OPAY INSTITUICAO DE PAGAMENTO LTDA	private	23	21	21	5	3508	701,6
+2026-01	POSTAL SAÚDE	private	466	458	279	50	36891,92	737,84
+2026-01	SEMENTES ELIANE	private	198	194	61	2	3193,3	1596,65
+2026-01	SQZ PREMIUM	private	46	38	38	29	23495,83	810,2
+2026-01	SUPERMERCADO IQUEGAMI	private	1843	1780	1246	360	86597,16	240,55
+2026-01	TOMBINI & CIA. LTDA	private	753	314	314	88	40823,43	463,9
+2026-01	Teste Portal	private	57	1	0	0	0	0
+2026-02	2CLIX TECNOLOGIA LTDA	private	17	15	15	5	2387,04	477,41
+2026-02	ATACADÃO DIA A DIA	private	6393	0	0	0	0	0
+2026-02	AUTODEFESA BRASIL	private	265	178	178	61	26119,83	428,19
+2026-02	Abramides	private	278	255	254	46	19611,08	426,33
+2026-02	CIRO MOTOS	private	338	338	209	45	30248,92	672,2
+2026-02	Chinezinho - CORREA DUARTE PARTICIPACOES	private	559	371	327	148	29575,9	199,84
+2026-02	EMERSON APARECIDO	private	6	5	5	0	0	0
+2026-02	ESPÁRTACO E GUARDED	private	1931	1517	824	151	41801,02	276,83
+2026-02	GD7	private	462	452	271	29	14185,31	489,15
+2026-02	Global	private	2117	24	24	5	6078,9	1215,78
+2026-02	Grupo ZA	private	25	25	18	10	13586,06	1358,61
+2026-02	Guanabara	private	2555	1862	1633	50	12450,89	249,02
+2026-02	HOWDEN BRASIL	private	136	132	78	5	290,03	58,01
+2026-02	HULAND, CASTRO ALVES, LINHARES & BARROS LEAL ADVOGADOS	private	56	0	0	0	0	0
+2026-02	Lojas rede	private	1762	1499	1055	331	136860,29	413,48
+2026-02	MERCADO VIOLETA	private	1795	1566	1549	499	79491,9	159,3
+2026-02	Midea	private	1698	893	407	29	19130,72	659,68
+2026-02	ONCOCLÍNICAS	private	7159	3783	2144	160	57421,26	358,88
+2026-02	ONFLY	private	630	620	551	46	39196,95	852,11
+2026-02	OPAY INSTITUICAO DE PAGAMENTO LTDA	private	23	20	20	5	3202,8	640,56
+2026-02	POSTAL SAÚDE	private	466	457	280	52	36595,29	703,76
+2026-02	SEMENTES ELIANE	private	260	256	98	11	10121,96	920,18
+2026-02	SQZ PREMIUM	private	50	1	1	2	1283,43	641,72
+2026-02	SUPERMERCADO IQUEGAMI	private	2057	1238	741	227	89056,19	392,32
+2026-02	TOMBINI & CIA. LTDA	private	771	327	327	92	43552,17	473,39
+2026-02	Teste Portal	private	57	1	0	0	0	0
+2026-03	2CLIX TECNOLOGIA LTDA	private	17	15	15	4	1583,88	395,97
+2026-03	ATACADÃO DIA A DIA	private	6393	0	0	0	0	0
+2026-03	AUTODEFESA BRASIL	private	291	184	184	61	28003,78	459,08
+2026-03	Abramides	private	281	259	258	48	18811,14	391,9
+2026-03	CIRO MOTOS	private	475	474	306	63	44081,93	699,71
+2026-03	Chinezinho - CORREA DUARTE PARTICIPACOES	private	573	396	353	151	31145,13	206,26
+2026-03	EMERSON APARECIDO	private	6	5	5	0	0	0
+2026-03	ESPÁRTACO E GUARDED	private	1931	1488	801	135	38228,65	283,18
+2026-03	GD7	private	469	426	262	41	18596,12	453,56
+2026-03	Global	private	2152	23	23	3	3886,8	1295,6
+2026-03	Grupo ZA	private	27	26	19	12	15106,59	1258,88
+2026-03	Guanabara	private	2555	1838	1614	47	12283,15	261,34
+2026-03	HOWDEN BRASIL	private	136	131	79	6	1206,35	201,06
+2026-03	HULAND, CASTRO ALVES, LINHARES & BARROS LEAL ADVOGADOS	private	59	0	0	0	0	0
+2026-03	Lojas rede	private	1762	1488	1050	313	124445,76	397,59
+2026-03	MERCADO VIOLETA	private	1950	1643	1630	440	74763,93	169,92
+2026-03	Midea	private	1698	888	403	25	6901,52	276,06
+2026-03	ONCOCLÍNICAS	private	7306	3704	2110	165	60962,38	369,47
+2026-03	ONFLY	private	681	671	595	55	42438,82	771,61
+2026-03	OPAY INSTITUICAO DE PAGAMENTO LTDA	private	23	20	20	4	2633,7	658,43
+2026-03	POSTAL SAÚDE	private	476	462	286	49	37582,52	766,99
+2026-03	SEMENTES ELIANE	private	260	255	98	15	12066,5	804,43
+2026-03	SQZ PREMIUM	private	56	0	0	0	0	0
+2026-03	SUPERMERCADO IQUEGAMI	private	2057	1335	825	240	65638,65	273,49
+2026-03	TOMBINI & CIA. LTDA	private	797	352	352	115	56592,31	492,11
+2026-03	Teste Portal	private	68	2	0	0	0	0
+2026-04	2CLIX TECNOLOGIA LTDA	private	17	16	16	4	1266,3	316,58
+2026-04	ATACADÃO DIA A DIA	private	6393	0	0	0	0	0
+2026-04	AUTODEFESA BRASIL	private	294	101	101	0	0	0
+2026-04	Abramides	private	281	261	260	30	7250,11	241,67
+2026-04	CIRO MOTOS	private	475	473	307	14	2753,04	196,65
+2026-04	Chinezinho - CORREA DUARTE PARTICIPACOES	private	573	403	360	67	7717,53	115,19
+2026-04	EMERSON APARECIDO	private	6	5	5	0	0	0
+2026-04	ESPÁRTACO E GUARDED	private	1931	1476	795	51	3920,18	76,87
+2026-04	GD7	private	469	336	198	15	4253,47	283,56
+2026-04	Global	private	2154	25	25	2	1944	972
+2026-04	Grupo ZA	private	27	24	17	5	1922,99	384,6
+2026-04	Guanabara	private	2591	1873	1642	28	1704,95	60,89
+2026-04	HOWDEN BRASIL	private	136	0	0	0	0	0
+2026-04	HULAND, CASTRO ALVES, LINHARES & BARROS LEAL ADVOGADOS	private	59	0	0	0	0	0
+2026-04	Lojas rede	private	1904	1553	1082	198	47824,3	241,54
+2026-04	MERCADO VIOLETA	private	1950	1794	1759	224	8468,52	37,81
+2026-04	Midea	private	1762	916	430	9	596,27	66,25
+2026-04	ONCOCLÍNICAS	private	7434	3651	2064	53	5371,85	101,36
+2026-04	ONFLY	private	681	671	595	10	6438,12	643,81
+2026-04	OPAY INSTITUICAO DE PAGAMENTO LTDA	private	23	0	0	0	0	0
+2026-04	POSTAL SAÚDE	private	481	472	295	15	2721,59	181,44
+2026-04	SEMENTES ELIANE	private	260	111	39	0	0	0
+2026-04	SQZ PREMIUM	private	56	0	0	0	0	0
+2026-04	SUPERMERCADO IQUEGAMI	private	2172	1292	768	94	5845,82	62,19
+2026-04	TOMBINI & CIA. LTDA	private	803	0	0	0	0	0
+2026-04	Teste Portal	private	74	1	0	0	0	0
+2026-05	2CLIX TECNOLOGIA LTDA	private	17	0	0	0	0	0
+2026-05	ATACADÃO DIA A DIA	private	6393	0	0	0	0	0
+2026-05	AUTODEFESA BRASIL	private	294	101	101	0	0	0
+2026-05	Abramides	private	281	0	0	0	0	0
+2026-05	CIRO MOTOS	private	475	0	0	0	0	0
+2026-05	Chinezinho - CORREA DUARTE PARTICIPACOES	private	573	0	0	0	0	0
+2026-05	EMERSON APARECIDO	private	6	5	5	0	0	0
+2026-05	ESPÁRTACO E GUARDED	private	1931	0	0	0	0	0
+2026-05	GD7	private	469	0	0	0	0	0
+2026-05	Global	private	2154	0	0	0	0	0
+2026-05	Grupo ZA	private	27	0	0	0	0	0
+2026-05	Guanabara	private	2591	0	0	0	0	0
+2026-05	HOWDEN BRASIL	private	136	0	0	0	0	0
+2026-05	HULAND, CASTRO ALVES, LINHARES & BARROS LEAL ADVOGADOS	private	59	0	0	0	0	0
+2026-05	Lojas rede	private	1904	0	0	0	0	0
+2026-05	MERCADO VIOLETA	private	1950	0	0	0	0	0
+2026-05	Midea	private	1762	0	0	0	0	0
+2026-05	ONCOCLÍNICAS	private	7434	0	0	0	0	0
+2026-05	ONFLY	private	681	0	0	0	0	0
+2026-05	OPAY INSTITUICAO DE PAGAMENTO LTDA	private	23	0	0	0	0	0
+2026-05	POSTAL SAÚDE	private	481	0	0	0	0	0
+2026-05	SEMENTES ELIANE	private	260	0	0	0	0	0
+2026-05	SQZ PREMIUM	private	56	0	0	0	0	0
+2026-05	SUPERMERCADO IQUEGAMI	private	2172	0	0	0	0	0
+2026-05	TOMBINI & CIA. LTDA	private	803	0	0	0	0	0
+2026-05	Teste Portal	private	74	0	0	0	0	0
+2026-06	2CLIX TECNOLOGIA LTDA	private	17	0	0	0	0	0
+2026-06	ATACADÃO DIA A DIA	private	6393	0	0	0	0	0
+2026-06	AUTODEFESA BRASIL	private	294	101	101	0	0	0
+2026-06	Abramides	private	281	0	0	0	0	0
+2026-06	CIRO MOTOS	private	475	0	0	0	0	0
+2026-06	Chinezinho - CORREA DUARTE PARTICIPACOES	private	573	0	0	0	0	0
+2026-06	EMERSON APARECIDO	private	6	5	5	0	0	0
+2026-06	ESPÁRTACO E GUARDED	private	1931	0	0	0	0	0
+2026-06	GD7	private	469	0	0	0	0	0
+2026-06	Global	private	2154	0	0	0	0	0
+2026-06	Grupo ZA	private	27	0	0	0	0	0
+2026-06	Guanabara	private	2591	0	0	0	0	0
+2026-06	HOWDEN BRASIL	private	136	0	0	0	0	0
+2026-06	HULAND, CASTRO ALVES, LINHARES & BARROS LEAL ADVOGADOS	private	59	0	0	0	0	0
+2026-06	Lojas rede	private	1904	0	0	0	0	0
+2026-06	MERCADO VIOLETA	private	1950	0	0	0	0	0
+2026-06	Midea	private	1762	0	0	0	0	0
+2026-06	ONCOCLÍNICAS	private	7434	0	0	0	0	0
+2026-06	ONFLY	private	681	0	0	0	0	0
+2026-06	OPAY INSTITUICAO DE PAGAMENTO LTDA	private	23	0	0	0	0	0
+2026-06	POSTAL SAÚDE	private	481	0	0	0	0	0
+2026-06	SEMENTES ELIANE	private	260	0	0	0	0	0
+2026-06	SQZ PREMIUM	private	56	0	0	0	0	0
+2026-06	SUPERMERCADO IQUEGAMI	private	2172	0	0	0	0	0
+2026-06	TOMBINI & CIA. LTDA	private	803	0	0	0	0	0
+2026-06	Teste Portal	private	74	0	0	0	0	0
+2026-07	2CLIX TECNOLOGIA LTDA	private	17	0	0	0	0	0
+2026-07	ATACADÃO DIA A DIA	private	6393	0	0	0	0	0
+2026-07	AUTODEFESA BRASIL	private	294	101	101	0	0	0
+2026-07	Abramides	private	281	0	0	0	0	0
+2026-07	CIRO MOTOS	private	475	0	0	0	0	0
+2026-07	Chinezinho - CORREA DUARTE PARTICIPACOES	private	573	0	0	0	0	0
+2026-07	EMERSON APARECIDO	private	6	5	5	0	0	0
+2026-07	ESPÁRTACO E GUARDED	private	1931	0	0	0	0	0
+2026-07	GD7	private	469	0	0	0	0	0
+2026-07	Global	private	2154	0	0	0	0	0
+2026-07	Grupo ZA	private	27	0	0	0	0	0
+2026-07	Guanabara	private	2591	0	0	0	0	0
+2026-07	HOWDEN BRASIL	private	136	0	0	0	0	0
+2026-07	HULAND, CASTRO ALVES, LINHARES & BARROS LEAL ADVOGADOS	private	59	0	0	0	0	0
+2026-07	Lojas rede	private	1904	0	0	0	0	0
+2026-07	MERCADO VIOLETA	private	1950	0	0	0	0	0
+2026-07	Midea	private	1762	0	0	0	0	0
+2026-07	ONCOCLÍNICAS	private	7434	0	0	0	0	0
+2026-07	ONFLY	private	681	0	0	0	0	0
+2026-07	OPAY INSTITUICAO DE PAGAMENTO LTDA	private	23	0	0	0	0	0
+2026-07	POSTAL SAÚDE	private	481	0	0	0	0	0
+2026-07	SEMENTES ELIANE	private	260	0	0	0	0	0
+2026-07	SQZ PREMIUM	private	56	0	0	0	0	0
+2026-07	SUPERMERCADO IQUEGAMI	private	2172	0	0	0	0	0
+2026-07	TOMBINI & CIA. LTDA	private	803	0	0	0	0	0
+2026-07	Teste Portal	private	74	0	0	0	0	0
+2026-08	2CLIX TECNOLOGIA LTDA	private	17	0	0	0	0	0
+2026-08	ATACADÃO DIA A DIA	private	6393	0	0	0	0	0
+2026-08	AUTODEFESA BRASIL	private	294	101	101	0	0	0
+2026-08	Abramides	private	281	0	0	0	0	0
+2026-08	CIRO MOTOS	private	475	0	0	0	0	0
+2026-08	Chinezinho - CORREA DUARTE PARTICIPACOES	private	573	0	0	0	0	0
+2026-08	EMERSON APARECIDO	private	6	5	5	0	0	0
+2026-08	ESPÁRTACO E GUARDED	private	1931	0	0	0	0	0
+2026-08	GD7	private	469	0	0	0	0	0
+2026-08	Global	private	2154	0	0	0	0	0
+2026-08	Grupo ZA	private	27	0	0	0	0	0
+2026-08	Guanabara	private	2591	0	0	0	0	0
+2026-08	HOWDEN BRASIL	private	136	0	0	0	0	0
+2026-08	HULAND, CASTRO ALVES, LINHARES & BARROS LEAL ADVOGADOS	private	59	0	0	0	0	0
+2026-08	Lojas rede	private	1904	0	0	0	0	0
+2026-08	MERCADO VIOLETA	private	1950	0	0	0	0	0
+2026-08	Midea	private	1762	0	0	0	0	0
+2026-08	ONCOCLÍNICAS	private	7434	0	0	0	0	0
+2026-08	ONFLY	private	681	0	0	0	0	0
+2026-08	OPAY INSTITUICAO DE PAGAMENTO LTDA	private	23	0	0	0	0	0
+2026-08	POSTAL SAÚDE	private	481	0	0	0	0	0
+2026-08	SEMENTES ELIANE	private	260	0	0	0	0	0
+2026-08	SQZ PREMIUM	private	56	0	0	0	0	0
+2026-08	SUPERMERCADO IQUEGAMI	private	2172	0	0	0	0	0
+2026-08	TOMBINI & CIA. LTDA	private	803	0	0	0	0	0
+2026-08	Teste Portal	private	74	0	0	0	0	0
+2026-09	2CLIX TECNOLOGIA LTDA	private	17	0	0	0	0	0
+2026-09	ATACADÃO DIA A DIA	private	6393	0	0	0	0	0
+2026-09	AUTODEFESA BRASIL	private	294	101	101	0	0	0
+2026-09	Abramides	private	281	0	0	0	0	0
+2026-09	CIRO MOTOS	private	475	0	0	0	0	0
+2026-09	Chinezinho - CORREA DUARTE PARTICIPACOES	private	573	0	0	0	0	0
+2026-09	EMERSON APARECIDO	private	6	5	5	0	0	0
+2026-09	ESPÁRTACO E GUARDED	private	1931	0	0	0	0	0
+2026-09	GD7	private	469	0	0	0	0	0
+2026-09	Global	private	2154	0	0	0	0	0
+2026-09	Grupo ZA	private	27	0	0	0	0	0
+2026-09	Guanabara	private	2591	0	0	0	0	0
+2026-09	HOWDEN BRASIL	private	136	0	0	0	0	0
+2026-09	HULAND, CASTRO ALVES, LINHARES & BARROS LEAL ADVOGADOS	private	59	0	0	0	0	0
+2026-09	Lojas rede	private	1904	0	0	0	0	0
+2026-09	MERCADO VIOLETA	private	1950	0	0	0	0	0
+2026-09	Midea	private	1762	0	0	0	0	0
+2026-09	ONCOCLÍNICAS	private	7434	0	0	0	0	0
+2026-09	ONFLY	private	681	0	0	0	0	0
+2026-09	OPAY INSTITUICAO DE PAGAMENTO LTDA	private	23	0	0	0	0	0
+2026-09	POSTAL SAÚDE	private	481	0	0	0	0	0
+2026-09	SEMENTES ELIANE	private	260	0	0	0	0	0
+2026-09	SQZ PREMIUM	private	56	0	0	0	0	0
+2026-09	SUPERMERCADO IQUEGAMI	private	2172	0	0	0	0	0
+2026-09	TOMBINI & CIA. LTDA	private	803	0	0	0	0	0
+2026-09	Teste Portal	private	74	0	0	0	0	0
+2026-10	2CLIX TECNOLOGIA LTDA	private	17	0	0	0	0	0
+2026-10	ATACADÃO DIA A DIA	private	6393	0	0	0	0	0
+2026-10	AUTODEFESA BRASIL	private	294	101	101	0	0	0
+2026-10	Abramides	private	281	0	0	0	0	0
+2026-10	CIRO MOTOS	private	475	0	0	0	0	0
+2026-10	Chinezinho - CORREA DUARTE PARTICIPACOES	private	573	0	0	0	0	0
+2026-10	EMERSON APARECIDO	private	6	5	5	0	0	0
+2026-10	ESPÁRTACO E GUARDED	private	1931	0	0	0	0	0
+2026-10	GD7	private	469	0	0	0	0	0
+2026-10	Global	private	2154	0	0	0	0	0
+2026-10	Grupo ZA	private	27	0	0	0	0	0
+2026-10	Guanabara	private	2591	0	0	0	0	0
+2026-10	HOWDEN BRASIL	private	136	0	0	0	0	0
+2026-10	HULAND, CASTRO ALVES, LINHARES & BARROS LEAL ADVOGADOS	private	59	0	0	0	0	0
+2026-10	Lojas rede	private	1904	0	0	0	0	0
+2026-10	MERCADO VIOLETA	private	1950	0	0	0	0	0
+2026-10	Midea	private	1762	0	0	0	0	0
+2026-10	ONCOCLÍNICAS	private	7434	0	0	0	0	0
+2026-10	ONFLY	private	681	0	0	0	0	0
+2026-10	OPAY INSTITUICAO DE PAGAMENTO LTDA	private	23	0	0	0	0	0
+2026-10	POSTAL SAÚDE	private	481	0	0	0	0	0
+2026-10	SEMENTES ELIANE	private	260	0	0	0	0	0
+2026-10	SQZ PREMIUM	private	56	0	0	0	0	0
+2026-10	SUPERMERCADO IQUEGAMI	private	2172	0	0	0	0	0
+2026-10	TOMBINI & CIA. LTDA	private	803	0	0	0	0	0
+2026-10	Teste Portal	private	74	0	0	0	0	0
+2026-11	2CLIX TECNOLOGIA LTDA	private	17	0	0	0	0	0
+2026-11	ATACADÃO DIA A DIA	private	6393	0	0	0	0	0
+2026-11	AUTODEFESA BRASIL	private	294	101	101	0	0	0
+2026-11	Abramides	private	281	0	0	0	0	0
+2026-11	CIRO MOTOS	private	475	0	0	0	0	0
+2026-11	Chinezinho - CORREA DUARTE PARTICIPACOES	private	573	0	0	0	0	0
+2026-11	EMERSON APARECIDO	private	6	5	5	0	0	0
+2026-11	ESPÁRTACO E GUARDED	private	1931	0	0	0	0	0
+2026-11	GD7	private	469	0	0	0	0	0
+2026-11	Global	private	2154	0	0	0	0	0
+2026-11	Grupo ZA	private	27	0	0	0	0	0
+2026-11	Guanabara	private	2591	0	0	0	0	0
+2026-11	HOWDEN BRASIL	private	136	0	0	0	0	0
+2026-11	HULAND, CASTRO ALVES, LINHARES & BARROS LEAL ADVOGADOS	private	59	0	0	0	0	0
+2026-11	Lojas rede	private	1904	0	0	0	0	0
+2026-11	MERCADO VIOLETA	private	1950	0	0	0	0	0
+2026-11	Midea	private	1762	0	0	0	0	0
+2026-11	ONCOCLÍNICAS	private	7434	0	0	0	0	0
+2026-11	ONFLY	private	681	0	0	0	0	0
+2026-11	OPAY INSTITUICAO DE PAGAMENTO LTDA	private	23	0	0	0	0	0
+2026-11	POSTAL SAÚDE	private	481	0	0	0	0	0
+2026-11	SEMENTES ELIANE	private	260	0	0	0	0	0
+2026-11	SQZ PREMIUM	private	56	0	0	0	0	0
+2026-11	SUPERMERCADO IQUEGAMI	private	2172	0	0	0	0	0
+2026-11	TOMBINI & CIA. LTDA	private	803	0	0	0	0	0
+2026-11	Teste Portal	private	74	0	0	0	0	0
+2026-12	2CLIX TECNOLOGIA LTDA	private	17	0	0	0	0	0
+2026-12	ATACADÃO DIA A DIA	private	6393	0	0	0	0	0
+2026-12	AUTODEFESA BRASIL	private	294	101	101	0	0	0
+2026-12	Abramides	private	281	0	0	0	0	0
+2026-12	CIRO MOTOS	private	475	0	0	0	0	0
+2026-12	Chinezinho - CORREA DUARTE PARTICIPACOES	private	573	0	0	0	0	0
+2026-12	EMERSON APARECIDO	private	6	5	5	0	0	0
+2026-12	ESPÁRTACO E GUARDED	private	1931	0	0	0	0	0
+2026-12	GD7	private	469	0	0	0	0	0
+2026-12	Global	private	2154	0	0	0	0	0
+2026-12	Grupo ZA	private	27	0	0	0	0	0
+2026-12	Guanabara	private	2591	0	0	0	0	0
+2026-12	HOWDEN BRASIL	private	136	0	0	0	0	0
+2026-12	HULAND, CASTRO ALVES, LINHARES & BARROS LEAL ADVOGADOS	private	59	0	0	0	0	0
+2026-12	Lojas rede	private	1904	0	0	0	0	0
+2026-12	MERCADO VIOLETA	private	1950	0	0	0	0	0
+2026-12	Midea	private	1762	0	0	0	0	0
+2026-12	ONCOCLÍNICAS	private	7434	0	0	0	0	0
+2026-12	ONFLY	private	681	0	0	0	0	0
+2026-12	OPAY INSTITUICAO DE PAGAMENTO LTDA	private	23	0	0	0	0	0
+2026-12	POSTAL SAÚDE	private	481	0	0	0	0	0
+2026-12	SEMENTES ELIANE	private	260	0	0	0	0	0
+2026-12	SQZ PREMIUM	private	56	0	0	0	0	0
+2026-12	SUPERMERCADO IQUEGAMI	private	2172	0	0	0	0	0
+2026-12	TOMBINI & CIA. LTDA	private	803	0	0	0	0	0
+2026-12	Teste Portal	private	74	0	0	0	0	0
+2026-01	BELO MONTE	public	227	226	88	16	8547,01	534,19
+2026-01	CAICÓ	public	1442	1422	449	84	27509,04	327,49
+2026-01	CEARÁ	public	132298	9363	6529	2265	3285500,84	1450,55
+2026-01	CPTM	public	4009	3131	1023	43	27749,7	645,34
+2026-01	DISTRITO FEDERAL	public	181965	158708	49631	9468	15081132,27	1592,85
+2026-01	ESTADO DE SANTA CATARINA	public	127156	125168	22489	2777	3338678,93	1202,26
+2026-01	Estado do Rio de Janeiro	public	392003	370979	101780	13565	21743312,66	1602,9
+2026-01	GOVERNO DO ESTADO DO PIAUÍ	public	80219	73662	29292	5802	3122668,77	538,21
+2026-01	LONDRINA	public	9717	6256	1984	76	28543,79	375,58
+2026-01	MUNICIPIO DE BALNEARIO CAMBORIU	public	4087	3551	1105	119	49786,25	418,37
+2026-01	MUNICIPIO DE BOA VISTA	public	13828	13023	6735	1698	770083,7	453,52
+2026-01	MUNICIPIO DE CAMBORIU	public	4049	2501	1101	204	141690,7	694,56
+2026-01	MUNICIPIO DE CHAPECÓ	public	3414	3377	839	74	64605,61	873,05
+2026-01	MUNICIPIO DE FLORIANOPOLIS	public	11168	7725	2678	119	64348,83	540,75
+2026-01	MUNICIPIO DE IGACI	public	649	641	204	14	7832,86	559,49
+2026-01	MUNICIPIO DE JAGUARIUNA	public	2123	2027	621	79	50183,98	635,24
+2026-01	MUNICIPIO DE JOINVILLE	public	13898	13634	5136	442	390490	883,46
+2026-01	MUNICIPIO DE PATOS	public	2055	1987	746	88	43889,21	498,74
+2026-01	MUNICIPIO DE PETROLINA	public	15184	10604	5917	1361	690964	507,69
+2026-01	MUNICIPIO DE POSSE	public	1516	1485	508	151	104710,5	693,45
+2026-01	MUNICIPIO DE VOLTA REDONDA	public	17008	12072	4427	824	581146,17	705,27
+2026-01	Maranhão Público	public	86549	84628	19417	3039	2114794,38	695,88
+2026-01	Município Duque de Caxias	public	6802	6513	2303	209	96187,28	460,23
+2026-01	PREFEITURA DE ARARIPINA	public	1426	1394	370	51	24170,95	473,94
+2026-01	PREFEITURA MUNICIPAL DE BOMBINHAS	public	1870	1655	717	191	142572,65	746,45
+2026-01	PREFEITURA SANTANA DO IPANEMA	public	3121	2135	898	252	112014,83	444,5
+2026-01	PÃO DE AÇÚCAR	public	2285	663	237	43	32297,09	751,1
+2026-01	SAAE SÃO CARLOS	public	460	441	131	9	4095,41	455,05
+2026-01	SÃO CARLOS	public	4367	3445	820	51	60132,29	1179,06
+2026-01	TIJUCAS	public	1331	1190	424	75	76783,46	1023,78
+2026-02	BELO MONTE	public	227	226	92	18	8224,87	456,94
+2026-02	CAICÓ	public	1442	1423	451	88	38998,47	443,16
+2026-02	CEARÁ	public	132334	14463	8881	2186	3825395,56	1749,95
+2026-02	CPTM	public	4034	3091	1012	43	20033,02	465,88
+2026-02	DISTRITO FEDERAL	public	181965	160067	50586	9621	16076907,74	1671,02
+2026-02	ESTADO DE SANTA CATARINA	public	128141	125193	22681	2705	3357912,55	1241,37
+2026-02	Estado do Rio de Janeiro	public	392003	16077	16061	12288	18231785,17	1483,71
+2026-02	GOVERNO DO ESTADO DO PIAUÍ	public	81828	73760	29532	5671	3127611,42	551,51
+2026-02	LONDRINA	public	9717	7744	2551	121	77270,19	638,6
+2026-02	MUNICIPIO DE BALNEARIO CAMBORIU	public	4119	3696	1186	119	62027,22	521,24
+2026-02	MUNICIPIO DE BOA VISTA	public	14332	12293	6342	1521	714118,17	469,51
+2026-02	MUNICIPIO DE CAMBORIU	public	4109	2453	1088	197	127814,36	648,8
+2026-02	MUNICIPIO DE CHAPECÓ	public	3654	3380	845	77	62205,06	807,86
+2026-02	MUNICIPIO DE FLORIANOPOLIS	public	11747	7709	2688	145	83078,71	572,96
+2026-02	MUNICIPIO DE IGACI	public	649	641	205	17	9770,93	574,76
+2026-02	MUNICIPIO DE ITU	public	3925	3925	1310	73	31621,14	433,17
+2026-02	MUNICIPIO DE JAGUARIUNA	public	2128	1944	594	86	59493,55	691,79
+2026-02	MUNICIPIO DE JOINVILLE	public	14137	13470	5095	455	323214,64	710,36
+2026-02	MUNICIPIO DE PATOS	public	2055	1967	754	88	53680,92	610,01
+2026-02	MUNICIPIO DE PETROLINA	public	15581	11474	6069	1252	575069,75	459,32
+2026-02	MUNICIPIO DE POSSE	public	1551	1276	431	131	83992,92	641,17
+2026-02	MUNICIPIO DE VOLTA REDONDA	public	17074	10840	4156	770	486806,73	632,22
+2026-02	Maranhão Público	public	86555	84505	19598	3075	2110656,43	686,39
+2026-02	Município Duque de Caxias	public	6862	5619	2087	212	99190,46	467,88
+2026-02	PREFEITURA DE ARARIPINA	public	1426	1389	370	52	28629,33	550,56
+2026-02	PREFEITURA MUNICIPAL DE BOMBINHAS	public	1917	1641	710	183	145682,09	796,08
+2026-02	PREFEITURA SANTANA DO IPANEMA	public	3189	2092	905	261	144122,96	552,2
+2026-02	PÃO DE AÇÚCAR	public	2285	605	215	42	26487,31	630,65
+2026-02	SAAE SÃO CARLOS	public	461	432	123	6	5437,96	906,33
+2026-02	SÃO CARLOS	public	4384	3478	833	46	60306,92	1311,02
+2026-02	TIJUCAS	public	1349	1194	429	75	69826,9	931,03
+2026-03	BELO MONTE	public	227	226	92	21	10356,01	493,14
+2026-03	CAICÓ	public	1446	1423	457	93	41500,91	446,25
+2026-03	CEARÁ	public	132416	19432	11616	2645	3207214,93	1212,56
+2026-03	CPTM	public	4034	3205	1046	54	32529,66	602,4
+2026-03	DISTRITO FEDERAL	public	182753	160592	51230	5931	2696414,49	454,63
+2026-03	ESTADO DE SANTA CATARINA	public	128141	125883	23183	3004	3747364,99	1247,46
+2026-03	Estado do Rio de Janeiro	public	392003	1	1	0	0	0
+2026-03	GOVERNO DO ESTADO DO PIAUÍ	public	81828	74287	30300	6188	3373953,53	545,24
+2026-03	LONDRINA	public	9754	7847	2625	129	75591,18	585,98
+2026-03	MUNICIPIO DE BALNEARIO CAMBORIU	public	4119	3684	1182	115	47284,37	411,17
+2026-03	MUNICIPIO DE BOA VISTA	public	14332	13121	6857	1766	783337,92	443,57
+2026-03	MUNICIPIO DE CAMBORIU	public	4452	3058	1430	230	143311,39	623,09
+2026-03	MUNICIPIO DE CHAPECÓ	public	3654	3617	940	69	50123,45	726,43
+2026-03	MUNICIPIO DE FLORIANOPOLIS	public	11747	9033	3443	198	108475,04	547,85
+2026-03	MUNICIPIO DE IGACI	public	649	636	209	20	15601,87	780,09
+2026-03	MUNICIPIO DE ITU	public	3995	3970	1355	126	78631,61	624,06
+2026-03	MUNICIPIO DE JAGUARIUNA	public	2128	1896	571	78	44277,62	567,66
+2026-03	MUNICIPIO DE JOINVILLE	public	14147	13674	5233	532	471676,86	886,61
+2026-03	MUNICIPIO DE OLIVENÇA	public	368	368	122	7	3283,15	469,02
+2026-03	MUNICIPIO DE PATOS	public	2055	1960	753	90	43246,77	480,52
+2026-03	MUNICIPIO DE PETROLINA	public	15581	11812	6268	1304	563623,06	432,23
+2026-03	MUNICIPIO DE POSSE	public	1559	1307	451	136	88888,42	653,59
+2026-03	MUNICIPIO DE VOLTA REDONDA	public	17074	10754	4112	771	554121,58	718,71
+2026-03	Maranhão Público	public	86555	84297	19718	3224	2292036,31	710,93
+2026-03	Município Duque de Caxias	public	6862	5619	2088	229	86789,21	378,99
+2026-03	PREFEITURA DE ARARIPINA	public	1426	1390	376	54	25955,73	480,66
+2026-03	PREFEITURA MUNICIPAL DE BOMBINHAS	public	1972	1685	732	191	155513,69	814,21
+2026-03	PREFEITURA SANTANA DO IPANEMA	public	3200	2701	1191	373	187804,48	503,5
+2026-03	PÃO DE AÇÚCAR	public	2285	603	215	45	27166	603,69
+2026-03	SAAE SÃO CARLOS	public	461	408	112	5	3391,31	678,26
+2026-03	SÃO CARLOS	public	4384	3462	826	52	63571,67	1222,53
+2026-03	TIJUCAS	public	1391	1225	441	79	81493,96	1031,57
+2026-04	BELO MONTE	public	227	220	92	8	1954,36	244,3
+2026-04	CAICÓ	public	1446	1422	456	59	17100,27	289,84
+2026-04	CEARÁ	public	132443	22224	12987	1653	2093544,97	1266,51
+2026-04	CPTM	public	4053	3140	1026	19	8166,32	429,81
+2026-04	DISTRITO FEDERAL	public	182753	1	1	0	0	0
+2026-04	ESTADO DE SANTA CATARINA	public	128365	125824	23237	1613	1182810,18	733,3
+2026-04	Estado do Rio de Janeiro	public	392003	1	1	0	0	0
+2026-04	GOVERNO DO ESTADO DO PIAUÍ	public	83354	73322	30009	3881	1273195,94	328,06
+2026-04	LONDRINA	public	9772	8004	2699	79	28331,23	358,62
+2026-04	MUNICIPIO DE BALNEARIO CAMBORIU	public	4146	3546	1082	12	3382,04	281,84
+2026-04	MUNICIPIO DE BOA VISTA	public	14332	13127	6877	1077	296050,96	274,88
+2026-04	MUNICIPIO DE CAMBORIU	public	4660	3415	1624	180	78640,61	436,89
+2026-04	MUNICIPIO DE CHAPECÓ	public	3697	3633	948	47	22834,95	485,85
+2026-04	MUNICIPIO DE FLORIANOPOLIS	public	11890	9342	3603	126	45609,38	361,98
+2026-04	MUNICIPIO DE IGACI	public	649	628	206	12	1906,54	158,88
+2026-04	MUNICIPIO DE ITU	public	4110	3739	1293	22	8955,53	407,07
+2026-04	MUNICIPIO DE JAGUARIUNA	public	2134	1825	519	5	657,8	131,56
+2026-04	MUNICIPIO DE JOINVILLE	public	14284	13659	5246	289	152959,69	529,27
+2026-04	MUNICIPIO DE OLIVENÇA	public	368	364	121	5	1864,44	372,89
+2026-04	MUNICIPIO DE PATOS	public	2059	1952	753	51	19656,83	385,43
+2026-04	MUNICIPIO DE PETROLINA	public	15766	11841	6278	774	264601,21	341,86
+2026-04	MUNICIPIO DE POSSE	public	1559	0	0	0	0	0
+2026-04	MUNICIPIO DE VOLTA REDONDA	public	17278	10825	4166	484	218251,43	450,93
+2026-04	Maranhão Público	public	86555	84635	19844	1985	932580,19	469,81
+2026-04	Município Duque de Caxias	public	6988	5721	2165	89	19952,39	224,18
+2026-04	PREFEITURA DE ARARIPINA	public	1450	1409	386	33	9469,39	286,95
+2026-04	PREFEITURA MUNICIPAL DE BOMBINHAS	public	1972	1713	750	110	55136,54	501,24
+2026-04	PREFEITURA SANTANA DO IPANEMA	public	3244	2757	1213	250	69422,73	277,69
+2026-04	PÃO DE AÇÚCAR	public	2285	0	0	0	0	0
+2026-04	SAAE SÃO CARLOS	public	463	420	120	3	2024,72	674,91
+2026-04	SÃO CARLOS	public	4451	3539	873	19	9512,01	500,63
+2026-04	TIJUCAS	public	1418	1244	454	51	33074,67	648,52
+2026-05	BELO MONTE	public	227	0	0	0	0	0
+2026-05	CAICÓ	public	1446	0	0	0	0	0
+2026-05	CEARÁ	public	132443	0	0	0	0	0
+2026-05	CPTM	public	4053	0	0	0	0	0
+2026-05	DISTRITO FEDERAL	public	182753	0	0	0	0	0
+2026-05	ESTADO DE SANTA CATARINA	public	128365	0	0	0	0	0
+2026-05	Estado do Rio de Janeiro	public	392003	0	0	0	0	0
+2026-05	GOVERNO DO ESTADO DO PIAUÍ	public	83354	0	0	0	0	0
+2026-05	LONDRINA	public	9772	0	0	0	0	0
+2026-05	MUNICIPIO DE BALNEARIO CAMBORIU	public	4146	0	0	0	0	0
+2026-05	MUNICIPIO DE BOA VISTA	public	14332	0	0	0	0	0
+2026-05	MUNICIPIO DE CAMBORIU	public	4660	0	0	0	0	0
+2026-05	MUNICIPIO DE CHAPECÓ	public	3697	0	0	0	0	0
+2026-05	MUNICIPIO DE FLORIANOPOLIS	public	11890	0	0	0	0	0
+2026-05	MUNICIPIO DE IGACI	public	649	0	0	0	0	0
+2026-05	MUNICIPIO DE ITU	public	4110	0	0	0	0	0
+2026-05	MUNICIPIO DE JAGUARIUNA	public	2134	0	0	0	0	0
+2026-05	MUNICIPIO DE JOINVILLE	public	14284	0	0	0	0	0
+2026-05	MUNICIPIO DE OLIVENÇA	public	368	0	0	0	0	0
+2026-05	MUNICIPIO DE PATOS	public	2059	0	0	0	0	0
+2026-05	MUNICIPIO DE PETROLINA	public	15766	0	0	0	0	0
+2026-05	MUNICIPIO DE POSSE	public	1559	0	0	0	0	0
+2026-05	MUNICIPIO DE VOLTA REDONDA	public	17278	0	0	0	0	0
+2026-05	Maranhão Público	public	86555	0	0	0	0	0
+2026-05	Município Duque de Caxias	public	6988	0	0	0	0	0
+2026-05	PREFEITURA DE ARARIPINA	public	1450	0	0	0	0	0
+2026-05	PREFEITURA MUNICIPAL DE BOMBINHAS	public	1972	0	0	0	0	0
+2026-05	PREFEITURA SANTANA DO IPANEMA	public	3244	0	0	0	0	0
+2026-05	PÃO DE AÇÚCAR	public	2285	0	0	0	0	0
+2026-05	SAAE SÃO CARLOS	public	463	0	0	0	0	0
+2026-05	SÃO CARLOS	public	4451	0	0	0	0	0
+2026-05	TIJUCAS	public	1418	0	0	0	0	0
+2026-06	BELO MONTE	public	227	0	0	0	0	0
+2026-06	CAICÓ	public	1446	0	0	0	0	0
+2026-06	CEARÁ	public	132443	0	0	0	0	0
+2026-06	CPTM	public	4053	0	0	0	0	0
+2026-06	DISTRITO FEDERAL	public	182753	0	0	0	0	0
+2026-06	ESTADO DE SANTA CATARINA	public	128365	0	0	0	0	0
+2026-06	Estado do Rio de Janeiro	public	392003	0	0	0	0	0
+2026-06	GOVERNO DO ESTADO DO PIAUÍ	public	83354	0	0	0	0	0
+2026-06	LONDRINA	public	9772	0	0	0	0	0
+2026-06	MUNICIPIO DE BALNEARIO CAMBORIU	public	4146	0	0	0	0	0
+2026-06	MUNICIPIO DE BOA VISTA	public	14332	0	0	0	0	0
+2026-06	MUNICIPIO DE CAMBORIU	public	4660	0	0	0	0	0
+2026-06	MUNICIPIO DE CHAPECÓ	public	3697	0	0	0	0	0
+2026-06	MUNICIPIO DE FLORIANOPOLIS	public	11890	0	0	0	0	0
+2026-06	MUNICIPIO DE IGACI	public	649	0	0	0	0	0
+2026-06	MUNICIPIO DE ITU	public	4110	0	0	0	0	0
+2026-06	MUNICIPIO DE JAGUARIUNA	public	2134	0	0	0	0	0
+2026-06	MUNICIPIO DE JOINVILLE	public	14284	0	0	0	0	0
+2026-06	MUNICIPIO DE OLIVENÇA	public	368	0	0	0	0	0
+2026-06	MUNICIPIO DE PATOS	public	2059	0	0	0	0	0
+2026-06	MUNICIPIO DE PETROLINA	public	15766	0	0	0	0	0
+2026-06	MUNICIPIO DE POSSE	public	1559	0	0	0	0	0
+2026-06	MUNICIPIO DE VOLTA REDONDA	public	17278	0	0	0	0	0
+2026-06	Maranhão Público	public	86555	0	0	0	0	0
+2026-06	Município Duque de Caxias	public	6988	0	0	0	0	0
+2026-06	PREFEITURA DE ARARIPINA	public	1450	0	0	0	0	0
+2026-06	PREFEITURA MUNICIPAL DE BOMBINHAS	public	1972	0	0	0	0	0
+2026-06	PREFEITURA SANTANA DO IPANEMA	public	3244	0	0	0	0	0
+2026-06	PÃO DE AÇÚCAR	public	2285	0	0	0	0	0
+2026-06	SAAE SÃO CARLOS	public	463	0	0	0	0	0
+2026-06	SÃO CARLOS	public	4451	0	0	0	0	0
+2026-06	TIJUCAS	public	1418	0	0	0	0	0
+2026-07	BELO MONTE	public	227	0	0	0	0	0
+2026-07	CAICÓ	public	1446	0	0	0	0	0
+2026-07	CEARÁ	public	132443	0	0	0	0	0
+2026-07	CPTM	public	4053	0	0	0	0	0
+2026-07	DISTRITO FEDERAL	public	182753	0	0	0	0	0
+2026-07	ESTADO DE SANTA CATARINA	public	128365	0	0	0	0	0
+2026-07	Estado do Rio de Janeiro	public	392003	0	0	0	0	0
+2026-07	GOVERNO DO ESTADO DO PIAUÍ	public	83354	0	0	0	0	0
+2026-07	LONDRINA	public	9772	0	0	0	0	0
+2026-07	MUNICIPIO DE BALNEARIO CAMBORIU	public	4146	0	0	0	0	0
+2026-07	MUNICIPIO DE BOA VISTA	public	14332	0	0	0	0	0
+2026-07	MUNICIPIO DE CAMBORIU	public	4660	0	0	0	0	0
+2026-07	MUNICIPIO DE CHAPECÓ	public	3697	0	0	0	0	0
+2026-07	MUNICIPIO DE FLORIANOPOLIS	public	11890	0	0	0	0	0
+2026-07	MUNICIPIO DE IGACI	public	649	0	0	0	0	0
+2026-07	MUNICIPIO DE ITU	public	4110	0	0	0	0	0
+2026-07	MUNICIPIO DE JAGUARIUNA	public	2134	0	0	0	0	0
+2026-07	MUNICIPIO DE JOINVILLE	public	14284	0	0	0	0	0
+2026-07	MUNICIPIO DE OLIVENÇA	public	368	0	0	0	0	0
+2026-07	MUNICIPIO DE PATOS	public	2059	0	0	0	0	0
+2026-07	MUNICIPIO DE PETROLINA	public	15766	0	0	0	0	0
+2026-07	MUNICIPIO DE POSSE	public	1559	0	0	0	0	0
+2026-07	MUNICIPIO DE VOLTA REDONDA	public	17278	0	0	0	0	0
+2026-07	Maranhão Público	public	86555	0	0	0	0	0
+2026-07	Município Duque de Caxias	public	6988	0	0	0	0	0
+2026-07	PREFEITURA DE ARARIPINA	public	1450	0	0	0	0	0
+2026-07	PREFEITURA MUNICIPAL DE BOMBINHAS	public	1972	0	0	0	0	0
+2026-07	PREFEITURA SANTANA DO IPANEMA	public	3244	0	0	0	0	0
+2026-07	PÃO DE AÇÚCAR	public	2285	0	0	0	0	0
+2026-07	SAAE SÃO CARLOS	public	463	0	0	0	0	0
+2026-07	SÃO CARLOS	public	4451	0	0	0	0	0
+2026-07	TIJUCAS	public	1418	0	0	0	0	0
+2026-08	BELO MONTE	public	227	0	0	0	0	0
+2026-08	CAICÓ	public	1446	0	0	0	0	0
+2026-08	CEARÁ	public	132443	0	0	0	0	0
+2026-08	CPTM	public	4053	0	0	0	0	0
+2026-08	DISTRITO FEDERAL	public	182753	0	0	0	0	0
+2026-08	ESTADO DE SANTA CATARINA	public	128365	0	0	0	0	0
+2026-08	Estado do Rio de Janeiro	public	392003	0	0	0	0	0
+2026-08	GOVERNO DO ESTADO DO PIAUÍ	public	83354	0	0	0	0	0
+2026-08	LONDRINA	public	9772	0	0	0	0	0
+2026-08	MUNICIPIO DE BALNEARIO CAMBORIU	public	4146	0	0	0	0	0
+2026-08	MUNICIPIO DE BOA VISTA	public	14332	0	0	0	0	0
+2026-08	MUNICIPIO DE CAMBORIU	public	4660	0	0	0	0	0
+2026-08	MUNICIPIO DE CHAPECÓ	public	3697	0	0	0	0	0
+2026-08	MUNICIPIO DE FLORIANOPOLIS	public	11890	0	0	0	0	0
+2026-08	MUNICIPIO DE IGACI	public	649	0	0	0	0	0
+2026-08	MUNICIPIO DE ITU	public	4110	0	0	0	0	0
+2026-08	MUNICIPIO DE JAGUARIUNA	public	2134	0	0	0	0	0
+2026-08	MUNICIPIO DE JOINVILLE	public	14284	0	0	0	0	0
+2026-08	MUNICIPIO DE OLIVENÇA	public	368	0	0	0	0	0
+2026-08	MUNICIPIO DE PATOS	public	2059	0	0	0	0	0
+2026-08	MUNICIPIO DE PETROLINA	public	15766	0	0	0	0	0
+2026-08	MUNICIPIO DE POSSE	public	1559	0	0	0	0	0
+2026-08	MUNICIPIO DE VOLTA REDONDA	public	17278	0	0	0	0	0
+2026-08	Maranhão Público	public	86555	0	0	0	0	0
+2026-08	Município Duque de Caxias	public	6988	0	0	0	0	0
+2026-08	PREFEITURA DE ARARIPINA	public	1450	0	0	0	0	0
+2026-08	PREFEITURA MUNICIPAL DE BOMBINHAS	public	1972	0	0	0	0	0
+2026-08	PREFEITURA SANTANA DO IPANEMA	public	3244	0	0	0	0	0
+2026-08	PÃO DE AÇÚCAR	public	2285	0	0	0	0	0
+2026-08	SAAE SÃO CARLOS	public	463	0	0	0	0	0
+2026-08	SÃO CARLOS	public	4451	0	0	0	0	0
+2026-08	TIJUCAS	public	1418	0	0	0	0	0
+2026-09	BELO MONTE	public	227	0	0	0	0	0
+2026-09	CAICÓ	public	1446	0	0	0	0	0
+2026-09	CEARÁ	public	132443	0	0	0	0	0
+2026-09	CPTM	public	4053	0	0	0	0	0
+2026-09	DISTRITO FEDERAL	public	182753	0	0	0	0	0
+2026-09	ESTADO DE SANTA CATARINA	public	128365	0	0	0	0	0
+2026-09	Estado do Rio de Janeiro	public	392003	0	0	0	0	0
+2026-09	GOVERNO DO ESTADO DO PIAUÍ	public	83354	0	0	0	0	0
+2026-09	LONDRINA	public	9772	0	0	0	0	0
+2026-09	MUNICIPIO DE BALNEARIO CAMBORIU	public	4146	0	0	0	0	0
+2026-09	MUNICIPIO DE BOA VISTA	public	14332	0	0	0	0	0
+2026-09	MUNICIPIO DE CAMBORIU	public	4660	0	0	0	0	0
+2026-09	MUNICIPIO DE CHAPECÓ	public	3697	0	0	0	0	0
+2026-09	MUNICIPIO DE FLORIANOPOLIS	public	11890	0	0	0	0	0
+2026-09	MUNICIPIO DE IGACI	public	649	0	0	0	0	0
+2026-09	MUNICIPIO DE ITU	public	4110	0	0	0	0	0
+2026-09	MUNICIPIO DE JAGUARIUNA	public	2134	0	0	0	0	0
+2026-09	MUNICIPIO DE JOINVILLE	public	14284	0	0	0	0	0
+2026-09	MUNICIPIO DE OLIVENÇA	public	368	0	0	0	0	0
+2026-09	MUNICIPIO DE PATOS	public	2059	0	0	0	0	0
+2026-09	MUNICIPIO DE PETROLINA	public	15766	0	0	0	0	0
+2026-09	MUNICIPIO DE POSSE	public	1559	0	0	0	0	0
+2026-09	MUNICIPIO DE VOLTA REDONDA	public	17278	0	0	0	0	0
+2026-09	Maranhão Público	public	86555	0	0	0	0	0
+2026-09	Município Duque de Caxias	public	6988	0	0	0	0	0
+2026-09	PREFEITURA DE ARARIPINA	public	1450	0	0	0	0	0
+2026-09	PREFEITURA MUNICIPAL DE BOMBINHAS	public	1972	0	0	0	0	0
+2026-09	PREFEITURA SANTANA DO IPANEMA	public	3244	0	0	0	0	0
+2026-09	PÃO DE AÇÚCAR	public	2285	0	0	0	0	0
+2026-09	SAAE SÃO CARLOS	public	463	0	0	0	0	0
+2026-09	SÃO CARLOS	public	4451	0	0	0	0	0
+2026-09	TIJUCAS	public	1418	0	0	0	0	0
+2026-10	BELO MONTE	public	227	0	0	0	0	0
+2026-10	CAICÓ	public	1446	0	0	0	0	0
+2026-10	CEARÁ	public	132443	0	0	0	0	0
+2026-10	CPTM	public	4053	0	0	0	0	0
+2026-10	DISTRITO FEDERAL	public	182753	0	0	0	0	0
+2026-10	ESTADO DE SANTA CATARINA	public	128365	0	0	0	0	0
+2026-10	Estado do Rio de Janeiro	public	392003	0	0	0	0	0
+2026-10	GOVERNO DO ESTADO DO PIAUÍ	public	83354	0	0	0	0	0
+2026-10	LONDRINA	public	9772	0	0	0	0	0
+2026-10	MUNICIPIO DE BALNEARIO CAMBORIU	public	4146	0	0	0	0	0
+2026-10	MUNICIPIO DE BOA VISTA	public	14332	0	0	0	0	0
+2026-10	MUNICIPIO DE CAMBORIU	public	4660	0	0	0	0	0
+2026-10	MUNICIPIO DE CHAPECÓ	public	3697	0	0	0	0	0
+2026-10	MUNICIPIO DE FLORIANOPOLIS	public	11890	0	0	0	0	0
+2026-10	MUNICIPIO DE IGACI	public	649	0	0	0	0	0
+2026-10	MUNICIPIO DE ITU	public	4110	0	0	0	0	0
+2026-10	MUNICIPIO DE JAGUARIUNA	public	2134	0	0	0	0	0
+2026-10	MUNICIPIO DE JOINVILLE	public	14284	0	0	0	0	0
+2026-10	MUNICIPIO DE OLIVENÇA	public	368	0	0	0	0	0
+2026-10	MUNICIPIO DE PATOS	public	2059	0	0	0	0	0
+2026-10	MUNICIPIO DE PETROLINA	public	15766	0	0	0	0	0
+2026-10	MUNICIPIO DE POSSE	public	1559	0	0	0	0	0
+2026-10	MUNICIPIO DE VOLTA REDONDA	public	17278	0	0	0	0	0
+2026-10	Maranhão Público	public	86555	0	0	0	0	0
+2026-10	Município Duque de Caxias	public	6988	0	0	0	0	0
+2026-10	PREFEITURA DE ARARIPINA	public	1450	0	0	0	0	0
+2026-10	PREFEITURA MUNICIPAL DE BOMBINHAS	public	1972	0	0	0	0	0
+2026-10	PREFEITURA SANTANA DO IPANEMA	public	3244	0	0	0	0	0
+2026-10	PÃO DE AÇÚCAR	public	2285	0	0	0	0	0
+2026-10	SAAE SÃO CARLOS	public	463	0	0	0	0	0
+2026-10	SÃO CARLOS	public	4451	0	0	0	0	0
+2026-10	TIJUCAS	public	1418	0	0	0	0	0
+2026-11	BELO MONTE	public	227	0	0	0	0	0
+2026-11	CAICÓ	public	1446	0	0	0	0	0
+2026-11	CEARÁ	public	132443	0	0	0	0	0
+2026-11	CPTM	public	4053	0	0	0	0	0
+2026-11	DISTRITO FEDERAL	public	182753	0	0	0	0	0
+2026-11	ESTADO DE SANTA CATARINA	public	128365	0	0	0	0	0
+2026-11	Estado do Rio de Janeiro	public	392003	0	0	0	0	0
+2026-11	GOVERNO DO ESTADO DO PIAUÍ	public	83354	0	0	0	0	0
+2026-11	LONDRINA	public	9772	0	0	0	0	0
+2026-11	MUNICIPIO DE BALNEARIO CAMBORIU	public	4146	0	0	0	0	0
+2026-11	MUNICIPIO DE BOA VISTA	public	14332	0	0	0	0	0
+2026-11	MUNICIPIO DE CAMBORIU	public	4660	0	0	0	0	0
+2026-11	MUNICIPIO DE CHAPECÓ	public	3697	0	0	0	0	0
+2026-11	MUNICIPIO DE FLORIANOPOLIS	public	11890	0	0	0	0	0
+2026-11	MUNICIPIO DE IGACI	public	649	0	0	0	0	0
+2026-11	MUNICIPIO DE ITU	public	4110	0	0	0	0	0
+2026-11	MUNICIPIO DE JAGUARIUNA	public	2134	0	0	0	0	0
+2026-11	MUNICIPIO DE JOINVILLE	public	14284	0	0	0	0	0
+2026-11	MUNICIPIO DE OLIVENÇA	public	368	0	0	0	0	0
+2026-11	MUNICIPIO DE PATOS	public	2059	0	0	0	0	0
+2026-11	MUNICIPIO DE PETROLINA	public	15766	0	0	0	0	0
+2026-11	MUNICIPIO DE POSSE	public	1559	0	0	0	0	0
+2026-11	MUNICIPIO DE VOLTA REDONDA	public	17278	0	0	0	0	0
+2026-11	Maranhão Público	public	86555	0	0	0	0	0
+2026-11	Município Duque de Caxias	public	6988	0	0	0	0	0
+2026-11	PREFEITURA DE ARARIPINA	public	1450	0	0	0	0	0
+2026-11	PREFEITURA MUNICIPAL DE BOMBINHAS	public	1972	0	0	0	0	0
+2026-11	PREFEITURA SANTANA DO IPANEMA	public	3244	0	0	0	0	0
+2026-11	PÃO DE AÇÚCAR	public	2285	0	0	0	0	0
+2026-11	SAAE SÃO CARLOS	public	463	0	0	0	0	0
+2026-11	SÃO CARLOS	public	4451	0	0	0	0	0
+2026-11	TIJUCAS	public	1418	0	0	0	0	0
+2026-12	BELO MONTE	public	227	0	0	0	0	0
+2026-12	CAICÓ	public	1446	0	0	0	0	0
+2026-12	CEARÁ	public	132443	0	0	0	0	0
+2026-12	CPTM	public	4053	0	0	0	0	0
+2026-12	DISTRITO FEDERAL	public	182753	0	0	0	0	0
+2026-12	ESTADO DE SANTA CATARINA	public	128365	0	0	0	0	0
+2026-12	Estado do Rio de Janeiro	public	392003	0	0	0	0	0
+2026-12	GOVERNO DO ESTADO DO PIAUÍ	public	83354	0	0	0	0	0
+2026-12	LONDRINA	public	9772	0	0	0	0	0
+2026-12	MUNICIPIO DE BALNEARIO CAMBORIU	public	4146	0	0	0	0	0
+2026-12	MUNICIPIO DE BOA VISTA	public	14332	0	0	0	0	0
+2026-12	MUNICIPIO DE CAMBORIU	public	4660	0	0	0	0	0
+2026-12	MUNICIPIO DE CHAPECÓ	public	3697	0	0	0	0	0
+2026-12	MUNICIPIO DE FLORIANOPOLIS	public	11890	0	0	0	0	0
+2026-12	MUNICIPIO DE IGACI	public	649	0	0	0	0	0
+2026-12	MUNICIPIO DE ITU	public	4110	0	0	0	0	0
+2026-12	MUNICIPIO DE JAGUARIUNA	public	2134	0	0	0	0	0
+2026-12	MUNICIPIO DE JOINVILLE	public	14284	0	0	0	0	0
+2026-12	MUNICIPIO DE OLIVENÇA	public	368	0	0	0	0	0
+2026-12	MUNICIPIO DE PATOS	public	2059	0	0	0	0	0
+2026-12	MUNICIPIO DE PETROLINA	public	15766	0	0	0	0	0
+2026-12	MUNICIPIO DE POSSE	public	1559	0	0	0	0	0
+2026-12	MUNICIPIO DE VOLTA REDONDA	public	17278	0	0	0	0	0
+2026-12	Maranhão Público	public	86555	0	0	0	0	0
+2026-12	Município Duque de Caxias	public	6988	0	0	0	0	0
+2026-12	PREFEITURA DE ARARIPINA	public	1450	0	0	0	0	0
+2026-12	PREFEITURA MUNICIPAL DE BOMBINHAS	public	1972	0	0	0	0	0
+2026-12	PREFEITURA SANTANA DO IPANEMA	public	3244	0	0	0	0	0
+2026-12	PÃO DE AÇÚCAR	public	2285	0	0	0	0	0
+2026-12	SAAE SÃO CARLOS	public	463	0	0	0	0	0
+2026-12	SÃO CARLOS	public	4451	0	0	0	0	0
+2026-12	TIJUCAS	public	1418	0	0	0	0	0
+`;
+
+        let dadosGlobais = [];
+        let chartInstance = null;
+        
+        // Estado atual do gráfico (Qual métrica está sendo mostrada)
+        let currentRankingMetric = 'valor'; 
+        let currentChartData = [];
+
+        const formatMoney = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
+        function carregarDadosEmbutidos() {
+            const linhas = rawData.trim().split('\n');
+            const cabecalhos = linhas[0].split('\t').map(h => h.trim());
+            
+            for (let i = 1; i < linhas.length; i++) {
+                if (!linhas[i].trim()) continue;
+                
+                const valores = linhas[i].split('\t');
+                let obj = {};
+                
+                cabecalhos.forEach((cabecalho, index) => {
+                    let val = valores[index] ? valores[index].trim() : '';
+                    let valFormatado = val.replace(',', '.');
+                    if (!isNaN(valFormatado) && valFormatado !== '') {
+                        obj[cabecalho] = parseFloat(valFormatado);
+                    } else {
+                        obj[cabecalho] = val;
+                    }
+                });
+                
+                if(obj.Mes) dadosGlobais.push(obj);
+            }
+
+            const mesesUnicos = [...new Set(dadosGlobais.map(d => d.Mes))].sort().reverse();
+            const selectMes = document.getElementById('mes-selector');
+            selectMes.innerHTML = '<option value="todos">Todos os Meses</option>';
+            
+            mesesUnicos.forEach(mes => {
+                if(mes) selectMes.innerHTML += `<option value="${mes}">${mes}</option>`;
+            });
+
+            if(mesesUnicos.length > 0 && mesesUnicos[0]) {
+                selectMes.value = mesesUnicos[0];
+            }
+        }
+
+        function openDashboard(setor) {
+            const mesSelecionado = document.getElementById('mes-selector').value;
+            
+            document.getElementById('home-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+
+            const titulos = { 'public': "Setor Público", 'private': "Setor Privado", 'grupo': "Grupo" };
+            document.getElementById('dash-title').innerText = `Dashboard - ${titulos[setor]}`;
+            document.getElementById('dash-subtitle').innerText = titulos[setor];
+            document.getElementById('dash-mes-label').innerText = mesSelecionado === 'todos' ? 'Todos' : mesSelecionado;
+
+            let dadosFiltrados = dadosGlobais.filter(d => d.Setor === setor);
+            if (mesSelecionado !== 'todos') {
+                dadosFiltrados = dadosFiltrados.filter(d => d.Mes === mesSelecionado);
+            }
+
+            let empresasAgrupadas = {};
+            dadosFiltrados.forEach(d => {
+                if (!empresasAgrupadas[d.Empresa_Grupo]) {
+                    empresasAgrupadas[d.Empresa_Grupo] = {
+                        nome: d.Empresa_Grupo,
+                        tpv: 0, vidas_elegiveis: 0, vidas_antecipando: 0
+                    };
+                }
+                empresasAgrupadas[d.Empresa_Grupo].tpv += (d.TPV_Transacionado || 0);
+                empresasAgrupadas[d.Empresa_Grupo].vidas_elegiveis += (d.Vidas_Elegiveis || 0);
+                empresasAgrupadas[d.Empresa_Grupo].vidas_antecipando += (d.Vidas_Antecipando || 0);
+            });
+
+            const dadosFinais = Object.values(empresasAgrupadas);
+            currentChartData = dadosFinais; // Salva para usar no gráfico interativo
+
+            let totalTpv = 0, totalElegiveis = 0, totalAntecipando = 0;
+            dadosFinais.forEach(d => {
+                totalTpv += d.tpv;
+                totalElegiveis += d.vidas_elegiveis;
+                totalAntecipando += d.vidas_antecipando;
+            });
+
+            const ticketMedio = totalAntecipando > 0 ? totalTpv / totalAntecipando : 0;
+            const penetracaoMedia = totalElegiveis > 0 ? (totalAntecipando / totalElegiveis) * 100 : 0;
+
+            document.getElementById('kpi-tpv').innerText = formatMoney(totalTpv);
+            document.getElementById('kpi-ticket').innerText = formatMoney(ticketMedio);
+            document.getElementById('kpi-vidas-ant').innerText = totalAntecipando.toLocaleString('pt-BR');
+            document.getElementById('kpi-penetracao').innerText = penetracaoMedia.toFixed(2).replace('.', ',') + '%';
+
+            const containerCards = document.getElementById('cards-empresas');
+            containerCards.innerHTML = '';
+            
+            const dadosParaCards = [...dadosFinais].sort((a,b) => {
+                let penA = a.vidas_elegiveis > 0 ? a.vidas_antecipando/a.vidas_elegiveis : 0;
+                let penB = b.vidas_elegiveis > 0 ? b.vidas_antecipando/b.vidas_elegiveis : 0;
+                return penB - penA;
+            });
+
+            dadosParaCards.forEach(d => {
+                if(d.vidas_elegiveis === 0 && d.tpv === 0) return; 
+                
+                const pen = d.vidas_elegiveis > 0 ? (d.vidas_antecipando / d.vidas_elegiveis) * 100 : 0;
+                containerCards.innerHTML += `
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+                        <h4 class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider truncate" title="${d.nome}">${d.nome}</h4>
+                        <p class="text-2xl font-bold text-primary mb-1">${pen.toFixed(2).replace('.', ',')}%</p>
+                        <p class="text-xs text-slate-400">${d.vidas_antecipando.toLocaleString('pt-BR')} de ${d.vidas_elegiveis.toLocaleString('pt-BR')} Vidas</p>
+                    </div>
+                `;
+            });
+
+            // Reseta o botão para 'valor' sempre que abrir um novo setor
+            changeRankingMetric('valor'); 
+        }
+
+        function goHome() {
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('home-view').classList.remove('hidden');
+        }
+
+        // Função que muda a métrica do gráfico e pinta os botões
+        function changeRankingMetric(metric) {
+            currentRankingMetric = metric;
+            
+            // Atualiza as cores dos botões
+            const btns = ['valor', 'vidas', 'penetracao', 'ticket'];
+            btns.forEach(b => {
+                const el = document.getElementById('btn-rank-' + b);
+                if (b === metric) {
+                    el.className = "px-4 py-1.5 rounded-full bg-primary text-white shadow-sm transition-all";
+                } else {
+                    el.className = "px-4 py-1.5 rounded-full text-slate-500 hover:text-slate-900 transition-all";
+                }
+            });
+
+            renderChart();
+        }
+
+        // Função que desenha o gráfico baseado na métrica escolhida
+        function renderChart() {
+            let dados = currentChartData;
+            
+            // Calcula as métricas para cada empresa
+            let dadosMapeados = dados.map(d => {
+                let pen = d.vidas_elegiveis > 0 ? (d.vidas_antecipando / d.vidas_elegiveis) * 100 : 0;
+                let tkt = d.vidas_antecipando > 0 ? d.tpv / d.vidas_antecipando : 0;
+                return {
+                    nome: d.nome,
+                    valor: d.tpv,
+                    vidas: d.vidas_antecipando,
+                    penetracao: pen,
+                    ticket: tkt
+                };
+            });
+
+            // Filtra os zerados para não poluir o gráfico
+            dadosMapeados = dadosMapeados.filter(d => d[currentRankingMetric] > 0);
+
+            // Ordena do maior para o menor baseado na métrica escolhida
+            dadosMapeados.sort((a, b) => b[currentRankingMetric] - a[currentRankingMetric]);
+
+            const labels = dadosMapeados.map(d => d.nome);
+            const valores = dadosMapeados.map(d => d[currentRankingMetric]);
+
+            // Configura o formato do texto dependendo da métrica
+            let labelText = '';
+            let formatCallback = (val) => val;
+
+            if (currentRankingMetric === 'valor') {
+                labelText = 'TPV Antecipado (R$)';
+                formatCallback = (val) => formatMoney(val);
+            } else if (currentRankingMetric === 'vidas') {
+                labelText = 'Vidas Antecipando';
+                formatCallback = (val) => val.toLocaleString('pt-BR');
+            } else if (currentRankingMetric === 'penetracao') {
+                labelText = 'Penetração (%)';
+                formatCallback = (val) => val.toFixed(2).replace('.', ',') + '%';
+            } else if (currentRankingMetric === 'ticket') {
+                labelText = 'Ticket Médio (R$)';
+                formatCallback = (val) => formatMoney(val);
+            }
+
+            const ctx = document.getElementById('rankingChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+
+            // Altura dinâmica para não espremer os nomes
+            const chartContainer = document.getElementById('chart-container');
+            const alturaCalculada = Math.max(500, labels.length * 30); // 30px por barra
+            chartContainer.style.height = alturaCalculada + 'px';
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: labelText,
+                        data: valores,
+                        backgroundColor: '#4a84f6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return labelText + ': ' + formatCallback(context.raw);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            grid: { display: false },
+                            ticks: {
+                                callback: function(value) {
+                                    // Formatação inteligente do eixo X
+                                    if (currentRankingMetric === 'valor' || currentRankingMetric === 'ticket') {
+                                        return 'R$ ' + (value >= 1000 ? (value/1000) + 'k' : value);
+                                    } else if (currentRankingMetric === 'penetracao') {
+                                        return value + '%';
+                                    }
+                                    return value;
+                                }
+                            }
+                        },
+                        y: { 
+                            grid: { display: false }, 
+                            ticks: { 
+                                font: { size: 10 },
+                                autoSkip: false // Força a mostrar todos os nomes
+                            } 
+                        }
+                    }
+                }
+            });
+        }
+
+        window.onload = carregarDadosEmbutidos;
+    </script>
+</body>
+</html>
