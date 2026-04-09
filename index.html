@@ -13,7 +13,7 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#11C76F',
+                        primary: '#11C76F', // Verde PicPay
                         secondary: '#333e4f',
                         bgLight: '#f4f6f9'
                     }
@@ -75,81 +75,78 @@
             <div class="mb-8 flex justify-between items-end">
                 <div>
                     <h2 class="text-3xl font-bold text-slate-900 mb-1">Reporting Diário - <span id="dash-subtitle">Setor</span></h2>
-                    <p class="text-slate-500">Visão 360 Histórica das Praças/Empresas</p>
+                    <p class="text-slate-500 mb-1">Visão 360 Histórica das Praças/Empresas</p>
+                    <p class="text-sm font-medium text-slate-400"><i class="fa-regular fa-clock mr-1"></i> Última atualização: <span id="dash-ultima-att">--/--/----</span></p>
                 </div>
                 <div class="bg-green-50 text-primary px-4 py-2 rounded-lg font-bold border border-green-100">
                     Mês: <span id="dash-mes-label">Todos</span>
                 </div>
             </div>
 
-            <!-- Cards de KPI (Atualizados com os novos ícones) -->
+            <!-- Cards de KPI -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
                 
-                 <!-- Card 1: Valor Antecipado -->
-                <div class="bg-primary text-white rounded-2xl p-6 shadow-md">
-                    <p class="text-green-100 text-sm font-medium mb-2">Valor Antecipado Total</p>
+                <!-- Card 1: Valor Antecipado -->
+                <div class="bg-primary text-white rounded-2xl p-6 shadow-md flex flex-col justify-center min-h-[120px]">
+                    <p class="text-green-100 text-sm font-medium mb-1">Valor Antecipado Total</p>
                     <h3 id="kpi-tpv" class="text-xl lg:text-2xl font-bold" title="Valor Total">R$ 0</h3>
                 </div>
-
                 
                 <!-- Card 2: Ticket Médio -->
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex justify-between items-center">
-                    <div>
-                        <p class="text-slate-500 text-sm font-medium mb-1">Ticket Médio Geral</p>
-                        <h3 id="kpi-ticket" class="text-2xl lg:text-3xl font-bold text-slate-800">R$ 0</h3>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between min-h-[120px]">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="text-slate-500 text-sm font-medium">Ticket Médio Geral</p>
+                        <div class="bg-slate-50 p-2.5 rounded-xl flex items-center justify-center border border-slate-100">
+                            <i class="fa-solid fa-arrow-trend-up text-lg text-primary"></i>
+                        </div>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded-xl flex items-center justify-center border border-slate-100">
-                        <i class="fa-solid fa-arrow-trend-up text-xl text-primary"></i>
-                    </div>
+                    <h3 id="kpi-ticket" class="text-2xl lg:text-3xl font-bold text-slate-800 truncate">R$ 0</h3>
                 </div>
 
                 <!-- Card 3: Vidas Antecipando -->
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex justify-between items-center">
-                    <div>
-                        <p class="text-slate-500 text-sm font-medium mb-1">Vidas Antecipando</p>
-                        <h3 id="kpi-vidas-ant" class="text-2xl lg:text-3xl font-bold text-slate-800">0</h3>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between min-h-[120px]">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="text-slate-500 text-sm font-medium">Vidas Antecipando</p>
+                        <div class="bg-slate-50 p-2.5 rounded-xl flex items-center justify-center border border-slate-100">
+                            <i class="fa-solid fa-users text-lg text-primary"></i>
+                        </div>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded-xl flex items-center justify-center border border-slate-100">
-                        <i class="fa-solid fa-users text-xl text-primary"></i>
-                    </div>
+                    <h3 id="kpi-vidas-ant" class="text-2xl lg:text-3xl font-bold text-slate-800 truncate">0</h3>
                 </div>
 
                 <!-- Card 4: Penetração -->
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex justify-between items-center">
-                    <div>
-                        <p class="text-slate-500 text-sm font-medium mb-1">Penetração Média</p>
-                        <h3 id="kpi-penetracao" class="text-2xl lg:text-3xl font-bold text-slate-800">0%</h3>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between min-h-[120px]">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="text-slate-500 text-sm font-medium">Penetração Média</p>
+                        <div class="bg-slate-50 p-2.5 rounded-xl flex items-center justify-center border border-slate-100">
+                            <i class="fa-solid fa-chart-pie text-lg text-primary"></i>
+                        </div>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded-xl flex items-center justify-center border border-slate-100">
-                        <i class="fa-solid fa-chart-pie text-xl text-primary"></i>
-                    </div>
+                    <h3 id="kpi-penetracao" class="text-2xl lg:text-3xl font-bold text-slate-800 truncate">0%</h3>
                 </div>
 
             </div>
+
             <!-- Penetração por Praça -->
             <h3 class="text-xl font-bold text-slate-800 mb-4 text-center">Penetração por Praça / Empresa</h3>
             <div id="cards-empresas" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10"></div>
 
             <!-- Gráfico Interativo -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                
-                <!-- Cabeçalho do Gráfico com os Botões -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div>
                         <h3 class="text-xl font-bold text-slate-800 mb-1">Ranking de Praças</h3>
                         <p class="text-slate-500 text-sm">Compare o desempenho por diferentes métricas.</p>
                     </div>
                     
-                    <!-- Botões de Filtro -->
-                    <div class="bg-slate-100 p-1 rounded-full inline-flex text-sm font-medium overflow-x-auto max-w-full">
-                        <button id="btn-rank-valor" onclick="changeRankingMetric('valor')" class="px-4 py-1.5 rounded-full bg-primary text-white shadow-sm transition-all whitespace-nowrap">Valor</button>
-                        <button id="btn-rank-vidas" onclick="changeRankingMetric('vidas')" class="px-4 py-1.5 rounded-full text-slate-500 hover:text-slate-900 transition-all whitespace-nowrap">Vidas</button>
-                        <button id="btn-rank-penetracao" onclick="changeRankingMetric('penetracao')" class="px-4 py-1.5 rounded-full text-slate-500 hover:text-slate-900 transition-all whitespace-nowrap">Penetração</button>
-                        <button id="btn-rank-ticket" onclick="changeRankingMetric('ticket')" class="px-4 py-1.5 rounded-full text-slate-500 hover:text-slate-900 transition-all whitespace-nowrap">Ticket Médio</button>
+                    <div class="bg-slate-100 p-1 rounded-full inline-flex text-sm font-medium">
+                        <button id="btn-rank-valor" onclick="changeRankingMetric('valor')" class="px-4 py-1.5 rounded-full bg-primary text-white shadow-sm transition-all">Valor</button>
+                        <button id="btn-rank-vidas" onclick="changeRankingMetric('vidas')" class="px-4 py-1.5 rounded-full text-slate-500 hover:text-slate-900 transition-all">Vidas</button>
+                        <button id="btn-rank-penetracao" onclick="changeRankingMetric('penetracao')" class="px-4 py-1.5 rounded-full text-slate-500 hover:text-slate-900 transition-all">Penetração</button>
+                        <button id="btn-rank-ticket" onclick="changeRankingMetric('ticket')" class="px-4 py-1.5 rounded-full text-slate-500 hover:text-slate-900 transition-all">Ticket Médio</button>
                     </div>
                 </div>
 
-                <!-- Container do Gráfico (Altura Dinâmica) -->
                 <div id="chart-container" class="relative w-full" style="height: 500px;">
                     <canvas id="rankingChart"></canvas>
                 </div>
@@ -158,6 +155,10 @@
     </div>
 
     <script>
+        // =========================================================================
+        // DATA DA ÚLTIMA ATUALIZAÇÃO (Altere aqui toda vez que colar dados novos)
+        // =========================================================================
+        const ultimaAtualizacao = "09/04/2026 às 14:15";
         // =========================================================================
         // DADOS BRUTOS: Cole os dados do Excel/Databricks entre as crases (``) abaixo.
         // =========================================================================
@@ -1021,6 +1022,7 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
         let currentChartData = [];
 
         const formatMoney = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+        const formatMoneyNoCents = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value);
 
         function carregarDadosEmbutidos() {
             const linhas = rawData.trim().split('\n');
@@ -1045,7 +1047,6 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
                 if(obj.Mes) dadosGlobais.push(obj);
             }
 
-            // Preenche o filtro de meses
             const mesesUnicos = [...new Set(dadosGlobais.map(d => d.Mes))].sort().reverse();
             const selectMes = document.getElementById('mes-selector');
             selectMes.innerHTML = '<option value="todos">Todos os Meses</option>';
@@ -1067,6 +1068,7 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
                 selectMes.value = mesesUnicos[0];
             }
         }
+
         function openDashboard(setor) {
             const mesSelecionado = document.getElementById('mes-selector').value;
             
@@ -1077,6 +1079,7 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
             document.getElementById('dash-title').innerText = `Dashboard - ${titulos[setor]}`;
             document.getElementById('dash-subtitle').innerText = titulos[setor];
             document.getElementById('dash-mes-label').innerText = mesSelecionado === 'todos' ? 'Todos' : mesSelecionado;
+            document.getElementById('dash-ultima-att').innerText = ultimaAtualizacao;
 
             let dadosFiltrados = dadosGlobais.filter(d => d.Setor === setor);
             if (mesSelecionado !== 'todos') {
@@ -1109,7 +1112,7 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
             const ticketMedio = totalAntecipando > 0 ? totalTpv / totalAntecipando : 0;
             const penetracaoMedia = totalElegiveis > 0 ? (totalAntecipando / totalElegiveis) * 100 : 0;
 
-            document.getElementById('kpi-tpv').innerText = formatMoney(totalTpv);
+            document.getElementById('kpi-tpv').innerText = formatMoneyNoCents(totalTpv);
             document.getElementById('kpi-ticket').innerText = formatMoney(ticketMedio);
             document.getElementById('kpi-vidas-ant').innerText = totalAntecipando.toLocaleString('pt-BR');
             document.getElementById('kpi-penetracao').innerText = penetracaoMedia.toFixed(2).replace('.', ',') + '%';
