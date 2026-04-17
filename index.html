@@ -121,9 +121,23 @@
 
             </div>
             
-            <!-- Penetração por Praça -->
-            <h3 class="text-xl font-bold text-slate-800 mb-4 text-center">Penetração por Praça / Empresa</h3>
-            <div id="cards-empresas" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10"></div>
+            <!-- Filtro Executivo (só aparece no Setor Privado) -->
+<div id="filtro-executivo-wrapper" class="hidden mb-6 flex justify-center">
+    <div class="bg-white border border-slate-200 rounded-xl px-5 py-3 shadow-sm flex items-center gap-3">
+        <i class="fa-solid fa-user-tie text-primary"></i>
+        <label class="text-sm font-bold text-slate-600">Filtrar por Executivo:</label>
+        <select id="executivo-selector" onchange="filtrarPorExecutivo()"
+            class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary p-2">
+            <option value="todos">Todos</option>
+            <option value="Monique Ferreira">Monique Ferreira</option>
+            <option value="Bruno Pessolato">Bruno Pessolato</option>
+        </select>
+    </div>
+</div>
+
+<!-- Penetração por Praça -->
+<h3 class="text-xl font-bold text-slate-800 mb-4 text-center">Penetração por Praça / Empresa</h3>
+<div id="cards-empresas" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10"></div>
 
             <!-- Gráfico Interativo -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
@@ -1071,84 +1085,137 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
                 selectMes.value = mesesUnicos[0];
             }
         }
-
+const mapaExecutivos = {
+    'SQZ PREMIUM': 'Monique Ferreira',
+    'Midea': 'Monique Ferreira',
+    'Guanabara': 'Monique Ferreira',
+    'MERCADO VIOLETA': 'Monique Ferreira',
+    'SUPERMERCADO IQUEGAMI': 'Monique Ferreira',
+    'Lojas rede': 'Monique Ferreira',
+    'TOMBINI & CIA. LTDA': 'Monique Ferreira',
+    'AUTODEFESA BRASIL': 'Monique Ferreira',
+    'Grupo ZA': 'Monique Ferreira',
+    '2CLIX TECNOLOGIA LTDA': 'Monique Ferreira',
+    'ONCOCLÍNICAS': 'Bruno Pessolato',
+    'ESPÁRTACO E GUARDED': 'Bruno Pessolato',
+    'POSTAL SAÚDE': 'Bruno Pessolato',
+    'CIRO MOTOS': 'Bruno Pessolato',
+    'PERSONALÍZE': 'Bruno Pessolato',
+    'SEMENTES ELIANE': 'Bruno Pessolato',
+    'HOWDEN BRASIL': 'Bruno Pessolato',
+    'EMERSON APARECIDO': 'Bruno Pessolato',
+    'OPAY INSTITUICAO DE PAGAMENTO LTDA': 'Bruno Pessolato',
+    'Global': 'Bruno Pessolato',
+    'GD7': 'Bruno Pessolato',
+    'Chinezinho - CORREA DUARTE PARTICIPACOES': 'Bruno Pessolato',
+    'Abramides': 'Bruno Pessolato',
+    'ONFLY': 'Bruno Pessolato'
+};
         function openDashboard(setor) {
-            const mesSelecionado = document.getElementById('mes-selector').value;
-            
-            document.getElementById('home-view').classList.add('hidden');
-            document.getElementById('dashboard-view').classList.remove('hidden');
+    const mesSelecionado = document.getElementById('mes-selector').value;
 
-            const titulos = { 'public': "Setor Público", 'private': "Setor Privado", 'grupo': "Grupo" };
-            document.getElementById('dash-title').innerText = `Dashboard - ${titulos[setor]}`;
-            document.getElementById('dash-subtitle').innerText = titulos[setor];
-            document.getElementById('dash-mes-label').innerText = mesSelecionado === 'todos' ? 'Todos' : mesSelecionado;
-            document.getElementById('dash-ultima-att').innerText = ultimaAtualizacao;
+    document.getElementById('home-view').classList.add('hidden');
+    document.getElementById('dashboard-view').classList.remove('hidden');
 
-            let dadosFiltrados = dadosGlobais.filter(d => d.Setor === setor);
-            if (mesSelecionado !== 'todos') {
-                dadosFiltrados = dadosFiltrados.filter(d => d.Mes === mesSelecionado);
-            }
+    const titulos = { 'public': "Setor Público", 'private': "Setor Privado", 'grupo': "Grupo" };
+    document.getElementById('dash-title').innerText = `Dashboard - ${titulos[setor]}`;
+    document.getElementById('dash-subtitle').innerText = titulos[setor];
+    document.getElementById('dash-mes-label').innerText = mesSelecionado === 'todos' ? 'Todos' : mesSelecionado;
+    document.getElementById('dash-ultima-att').innerText = ultimaAtualizacao;
 
-            let empresasAgrupadas = {};
-            dadosFiltrados.forEach(d => {
-                if (!empresasAgrupadas[d.Empresa_Grupo]) {
-    empresasAgrupadas[d.Empresa_Grupo] = {
-        nome: d.Empresa_Grupo,
-        tpv: 0,
-        vidas_elegiveis: 0,
-        vidas_antecipando: 0,
-        vidas_com_conta: 0
-    };
+    // Mostra ou esconde o filtro de executivo
+    const filtroWrapper = document.getElementById('filtro-executivo-wrapper');
+    if (setor === 'private') {
+        filtroWrapper.classList.remove('hidden');
+        document.getElementById('executivo-selector').value = 'todos';
+    } else {
+        filtroWrapper.classList.add('hidden');
+    }
+
+    // Guarda o setor atual para usar no filtro depois
+    window.setorAtual = setor;
+
+    renderDashboard(setor, mesSelecionado, 'todos');
 }
-empresasAgrupadas[d.Empresa_Grupo].tpv += (d.TPV_Transacionado || 0);
-empresasAgrupadas[d.Empresa_Grupo].vidas_elegiveis += (d.Vidas_Elegiveis || 0);
-empresasAgrupadas[d.Empresa_Grupo].vidas_antecipando += (d.Vidas_Antecipando || 0);
-empresasAgrupadas[d.Empresa_Grupo].vidas_com_conta += (d.Vidas_Com_Conta || 0);
-            });
 
-            const dadosFinais = Object.values(empresasAgrupadas);
-            currentChartData = dadosFinais;
+function filtrarPorExecutivo() {
+    const executivo = document.getElementById('executivo-selector').value;
+    const mesSelecionado = document.getElementById('mes-selector').value;
+    renderDashboard(window.setorAtual, mesSelecionado, executivo);
+}
 
-            let totalTpv = 0, totalElegiveis = 0, totalAntecipando = 0;
-            dadosFinais.forEach(d => {
-                totalTpv += d.tpv;
-                totalElegiveis += d.vidas_elegiveis;
-                totalAntecipando += d.vidas_antecipando;
-            });
+function renderDashboard(setor, mesSelecionado, executivoFiltro) {
+    let dadosFiltrados = dadosGlobais.filter(d => d.Setor === setor);
+    if (mesSelecionado !== 'todos') {
+        dadosFiltrados = dadosFiltrados.filter(d => d.Mes === mesSelecionado);
+    }
 
-            const ticketMedio = totalAntecipando > 0 ? totalTpv / totalAntecipando : 0;
-            const penetracaoMedia = totalElegiveis > 0 ? (totalAntecipando / totalElegiveis) * 100 : 0;
-
-            document.getElementById('kpi-tpv').innerText = formatMoneyNoCents(totalTpv);
-            document.getElementById('kpi-ticket').innerText = formatMoney(ticketMedio);
-            document.getElementById('kpi-vidas-ant').innerText = totalAntecipando.toLocaleString('pt-BR');
-            document.getElementById('kpi-penetracao').innerText = penetracaoMedia.toFixed(2).replace('.', ',') + '%';
-
-            const containerCards = document.getElementById('cards-empresas');
-            containerCards.innerHTML = '';
-            
-            const dadosParaCards = [...dadosFinais].sort((a,b) => {
-                let penA = a.vidas_elegiveis > 0 ? a.vidas_antecipando/a.vidas_elegiveis : 0;
-                let penB = b.vidas_elegiveis > 0 ? b.vidas_antecipando/b.vidas_elegiveis : 0;
-                return penB - penA;
-            });
-
-            dadosParaCards.forEach(d => {
-                if(d.vidas_elegiveis === 0 && d.tpv === 0) return; 
-                
-                const pen = d.vidas_elegiveis > 0 ? (d.vidas_antecipando / d.vidas_elegiveis) * 100 : 0;
-               containerCards.innerHTML += `
-    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
-        <h4 class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider truncate" title="${d.nome}">${d.nome}</h4>
-        <p class="text-2xl font-bold text-primary mb-1">${pen.toFixed(2).replace('.', ',')}%</p>
-        <p class="text-xs text-slate-400 mb-1">${d.vidas_antecipando.toLocaleString('pt-BR')} de ${d.vidas_elegiveis.toLocaleString('pt-BR')} vidas</p>
-        <p class="text-xs text-slate-500 font-medium">${(d.vidas_com_conta || 0).toLocaleString('pt-BR')} vidas com conta</p>
-    </div>
-`;
-            });
-
-            changeRankingMetric('valor'); 
+    let empresasAgrupadas = {};
+    dadosFiltrados.forEach(d => {
+        if (!empresasAgrupadas[d.Empresa_Grupo]) {
+            empresasAgrupadas[d.Empresa_Grupo] = {
+                nome: d.Empresa_Grupo,
+                tpv: 0,
+                vidas_elegiveis: 0,
+                vidas_antecipando: 0,
+                vidas_com_conta: 0
+            };
         }
+        empresasAgrupadas[d.Empresa_Grupo].tpv += (d.TPV_Transacionado || 0);
+        empresasAgrupadas[d.Empresa_Grupo].vidas_elegiveis += (d.Vidas_Elegiveis || 0);
+        empresasAgrupadas[d.Empresa_Grupo].vidas_antecipando += (d.Vidas_Antecipando || 0);
+        empresasAgrupadas[d.Empresa_Grupo].vidas_com_conta += (d.Vidas_Com_Conta || 0);
+    });
+
+    let dadosFinais = Object.values(empresasAgrupadas);
+
+    // Aplica filtro de executivo se necessário
+    if (executivoFiltro !== 'todos') {
+        dadosFinais = dadosFinais.filter(d => mapaExecutivos[d.nome] === executivoFiltro);
+    }
+
+    currentChartData = dadosFinais;
+
+    let totalTpv = 0, totalElegiveis = 0, totalAntecipando = 0;
+    dadosFinais.forEach(d => {
+        totalTpv += d.tpv;
+        totalElegiveis += d.vidas_elegiveis;
+        totalAntecipando += d.vidas_antecipando;
+    });
+
+    const ticketMedio = totalAntecipando > 0 ? totalTpv / totalAntecipando : 0;
+    const penetracaoMedia = totalElegiveis > 0 ? (totalAntecipando / totalElegiveis) * 100 : 0;
+
+    document.getElementById('kpi-tpv').innerText = formatMoneyNoCents(totalTpv);
+    document.getElementById('kpi-ticket').innerText = formatMoney(ticketMedio);
+    document.getElementById('kpi-vidas-ant').innerText = totalAntecipando.toLocaleString('pt-BR');
+    document.getElementById('kpi-penetracao').innerText = penetracaoMedia.toFixed(2).replace('.', ',') + '%';
+
+    const containerCards = document.getElementById('cards-empresas');
+    containerCards.innerHTML = '';
+
+    const dadosParaCards = [...dadosFinais].sort((a, b) => {
+        let penA = a.vidas_elegiveis > 0 ? a.vidas_antecipando / a.vidas_elegiveis : 0;
+        let penB = b.vidas_elegiveis > 0 ? b.vidas_antecipando / b.vidas_elegiveis : 0;
+        return penB - penA;
+    });
+
+    dadosParaCards.forEach(d => {
+        if (d.vidas_elegiveis === 0 && d.tpv === 0) return;
+
+        const pen = d.vidas_elegiveis > 0 ? (d.vidas_antecipando / d.vidas_elegiveis) * 100 : 0;
+        containerCards.innerHTML += `
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+                <h4 class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider truncate" title="${d.nome}">${d.nome}</h4>
+                <p class="text-2xl font-bold text-primary mb-1">${pen.toFixed(2).replace('.', ',')}%</p>
+                <p class="text-xs text-slate-400 mb-1">${d.vidas_antecipando.toLocaleString('pt-BR')} de ${d.vidas_elegiveis.toLocaleString('pt-BR')} vidas</p>
+                <p class="text-xs text-slate-500 font-medium">${(d.vidas_com_conta || 0).toLocaleString('pt-BR')} vidas com conta</p>
+            </div>
+        `;
+    });
+
+    changeRankingMetric('valor');
+}
 
         function goHome() {
             document.getElementById('dashboard-view').classList.add('hidden');
