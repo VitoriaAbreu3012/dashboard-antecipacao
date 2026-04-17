@@ -1092,14 +1092,18 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
             let empresasAgrupadas = {};
             dadosFiltrados.forEach(d => {
                 if (!empresasAgrupadas[d.Empresa_Grupo]) {
-                    empresasAgrupadas[d.Empresa_Grupo] = {
-                        nome: d.Empresa_Grupo,
-                        tpv: 0, vidas_elegiveis: 0, vidas_antecipando: 0
-                    };
-                }
-                empresasAgrupadas[d.Empresa_Grupo].tpv += (d.TPV_Transacionado || 0);
-                empresasAgrupadas[d.Empresa_Grupo].vidas_elegiveis += (d.Vidas_Elegiveis || 0);
-                empresasAgrupadas[d.Empresa_Grupo].vidas_antecipando += (d.Vidas_Antecipando || 0);
+    empresasAgrupadas[d.Empresa_Grupo] = {
+        nome: d.Empresa_Grupo,
+        tpv: 0,
+        vidas_elegiveis: 0,
+        vidas_antecipando: 0,
+        vidas_com_conta: 0
+    };
+}
+empresasAgrupadas[d.Empresa_Grupo].tpv += (d.TPV_Transacionado || 0);
+empresasAgrupadas[d.Empresa_Grupo].vidas_elegiveis += (d.Vidas_Elegiveis || 0);
+empresasAgrupadas[d.Empresa_Grupo].vidas_antecipando += (d.Vidas_Antecipando || 0);
+empresasAgrupadas[d.Empresa_Grupo].vidas_com_conta += (d.Vidas_Com_Conta || 0);
             });
 
             const dadosFinais = Object.values(empresasAgrupadas);
@@ -1138,7 +1142,7 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
         <h4 class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider truncate" title="${d.nome}">${d.nome}</h4>
         <p class="text-2xl font-bold text-primary mb-1">${pen.toFixed(2).replace('.', ',')}%</p>
         <p class="text-xs text-slate-400 mb-1">${d.vidas_antecipando.toLocaleString('pt-BR')} de ${d.vidas_elegiveis.toLocaleString('pt-BR')} vidas</p>
-        <p class="text-xs text-slate-500 font-medium">${d.vidas_com_conta.toLocaleString('pt-BR')} vidas com conta</p>
+        <p class="text-xs text-slate-500 font-medium">${(d.vidas_com_conta || 0).toLocaleString('pt-BR')} vidas com conta</p>
     </div>
 `;
             });
