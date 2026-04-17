@@ -84,34 +84,42 @@
             </div>
 
              <!-- Cards de KPI -->
-<div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-10">
-    <div class="bg-primary text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
-        <p class="text-blue-100 text-sm font-medium mb-1">Valor Antecipado Total</p>
-        <h3 id="kpi-tpv" class="text-3xl font-bold">R$ 0</h3>
-        <i class="fa-solid fa-money-bill-wave absolute bottom-4 right-6 text-4xl opacity-20"></i>
-    </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                
+                <!-- Card 1: Valor Antecipado -->
+                <div class="bg-primary text-white rounded-2xl p-6 shadow-md flex flex-col justify-center">
+                    <p class="text-green-100 text-sm font-medium mb-1">Valor Antecipado Total</p>
+                    <h3 id="kpi-tpv" class="text-2xl lg:text-3xl font-bold" title="Valor Total">R$ 0</h3>
+                </div>
+                
+                <!-- Card 2: Ticket Médio -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-center">
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="text-slate-500 text-sm font-medium">Ticket Médio Geral</p>
+                        <i class="fa-solid fa-arrow-trend-up text-primary"></i>
+                    </div>
+                    <h3 id="kpi-ticket" class="text-2xl lg:text-3xl font-bold text-slate-800 truncate">R$ 0</h3>
+                </div>
 
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-        <p class="text-slate-500 text-sm font-medium mb-1">Ticket Médio Geral</p>
-        <h3 id="kpi-ticket" class="text-3xl font-bold text-slate-800">R$ 0</h3>
-    </div>
+                <!-- Card 3: Vidas Antecipando -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-center">
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="text-slate-500 text-sm font-medium">Vidas Antecipando</p>
+                        <i class="fa-solid fa-users text-primary"></i>
+                    </div>
+                    <h3 id="kpi-vidas-ant" class="text-2xl lg:text-3xl font-bold text-slate-800 truncate">0</h3>
+                </div>
 
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-        <p class="text-slate-500 text-sm font-medium mb-1">Vidas Antecipando</p>
-        <h3 id="kpi-vidas-ant" class="text-3xl font-bold text-slate-800">0</h3>
-    </div>
+                <!-- Card 4: Penetração -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-center">
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="text-slate-500 text-sm font-medium">Penetração Média</p>
+                        <i class="fa-solid fa-chart-pie text-primary"></i>
+                    </div>
+                    <h3 id="kpi-penetracao" class="text-2xl lg:text-3xl font-bold text-slate-800 truncate">0%</h3>
+                </div>
 
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-        <p class="text-slate-500 text-sm font-medium mb-1">Vidas com Conta</p>
-        <h3 id="kpi-vidas-conta" class="text-3xl font-bold text-slate-800">0</h3>
-    </div>
-
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-        <p class="text-slate-500 text-sm font-medium mb-1">Penetração Média</p>
-        <h3 id="kpi-penetracao" class="text-3xl font-bold text-primary">0%</h3>
-    </div>
-</div>
-
+            </div>
             
             <!-- Penetração por Praça -->
             <h3 class="text-xl font-bold text-slate-800 mb-4 text-center">Penetração por Praça / Empresa</h3>
@@ -1065,83 +1073,77 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
         }
 
         function openDashboard(setor) {
-    const mesSelecionado = document.getElementById('mes-selector').value;
-    
-    document.getElementById('home-view').classList.add('hidden');
-    document.getElementById('dashboard-view').classList.remove('hidden');
+            const mesSelecionado = document.getElementById('mes-selector').value;
+            
+            document.getElementById('home-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
 
-    const titulos = { 'public': "Setor Público", 'private': "Setor Privado", 'grupo': "Grupo" };
-    document.getElementById('dash-title').innerText = `Dashboard - ${titulos[setor]}`;
-    document.getElementById('dash-subtitle').innerText = titulos[setor];
-    document.getElementById('dash-mes-label').innerText = mesSelecionado === 'todos' ? 'Todos' : mesSelecionado;
+            const titulos = { 'public': "Setor Público", 'private': "Setor Privado", 'grupo': "Grupo" };
+            document.getElementById('dash-title').innerText = `Dashboard - ${titulos[setor]}`;
+            document.getElementById('dash-subtitle').innerText = titulos[setor];
+            document.getElementById('dash-mes-label').innerText = mesSelecionado === 'todos' ? 'Todos' : mesSelecionado;
+            document.getElementById('dash-ultima-att').innerText = ultimaAtualizacao;
 
-    let dadosFiltrados = dadosGlobais.filter(d => d.Setor === setor);
-    if (mesSelecionado !== 'todos') {
-        dadosFiltrados = dadosFiltrados.filter(d => d.Mes === mesSelecionado);
-    }
+            let dadosFiltrados = dadosGlobais.filter(d => d.Setor === setor);
+            if (mesSelecionado !== 'todos') {
+                dadosFiltrados = dadosFiltrados.filter(d => d.Mes === mesSelecionado);
+            }
 
-    let empresasAgrupadas = {};
-    dadosFiltrados.forEach(d => {
-        if (!empresasAgrupadas[d.Empresa_Grupo]) {
-            empresasAgrupadas[d.Empresa_Grupo] = {
-                nome: d.Empresa_Grupo,
-                tpv: 0,
-                vidas_elegiveis: 0,
-                vidas_antecipando: 0,
-                vidas_com_conta: 0
-            };
+            let empresasAgrupadas = {};
+            dadosFiltrados.forEach(d => {
+                if (!empresasAgrupadas[d.Empresa_Grupo]) {
+                    empresasAgrupadas[d.Empresa_Grupo] = {
+                        nome: d.Empresa_Grupo,
+                        tpv: 0, vidas_elegiveis: 0, vidas_antecipando: 0
+                    };
+                }
+                empresasAgrupadas[d.Empresa_Grupo].tpv += (d.TPV_Transacionado || 0);
+                empresasAgrupadas[d.Empresa_Grupo].vidas_elegiveis += (d.Vidas_Elegiveis || 0);
+                empresasAgrupadas[d.Empresa_Grupo].vidas_antecipando += (d.Vidas_Antecipando || 0);
+            });
+
+            const dadosFinais = Object.values(empresasAgrupadas);
+            currentChartData = dadosFinais;
+
+            let totalTpv = 0, totalElegiveis = 0, totalAntecipando = 0;
+            dadosFinais.forEach(d => {
+                totalTpv += d.tpv;
+                totalElegiveis += d.vidas_elegiveis;
+                totalAntecipando += d.vidas_antecipando;
+            });
+
+            const ticketMedio = totalAntecipando > 0 ? totalTpv / totalAntecipando : 0;
+            const penetracaoMedia = totalElegiveis > 0 ? (totalAntecipando / totalElegiveis) * 100 : 0;
+
+            document.getElementById('kpi-tpv').innerText = formatMoneyNoCents(totalTpv);
+            document.getElementById('kpi-ticket').innerText = formatMoney(ticketMedio);
+            document.getElementById('kpi-vidas-ant').innerText = totalAntecipando.toLocaleString('pt-BR');
+            document.getElementById('kpi-penetracao').innerText = penetracaoMedia.toFixed(2).replace('.', ',') + '%';
+
+            const containerCards = document.getElementById('cards-empresas');
+            containerCards.innerHTML = '';
+            
+            const dadosParaCards = [...dadosFinais].sort((a,b) => {
+                let penA = a.vidas_elegiveis > 0 ? a.vidas_antecipando/a.vidas_elegiveis : 0;
+                let penB = b.vidas_elegiveis > 0 ? b.vidas_antecipando/b.vidas_elegiveis : 0;
+                return penB - penA;
+            });
+
+            dadosParaCards.forEach(d => {
+                if(d.vidas_elegiveis === 0 && d.tpv === 0) return; 
+                
+                const pen = d.vidas_elegiveis > 0 ? (d.vidas_antecipando / d.vidas_elegiveis) * 100 : 0;
+                containerCards.innerHTML += `
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+                        <h4 class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider truncate" title="${d.nome}">${d.nome}</h4>
+                        <p class="text-2xl font-bold text-primary mb-1">${pen.toFixed(2).replace('.', ',')}%</p>
+                        <p class="text-xs text-slate-400">${d.vidas_antecipando.toLocaleString('pt-BR')} de ${d.vidas_elegiveis.toLocaleString('pt-BR')} Vidas</p>
+                    </div>
+                `;
+            });
+
+            changeRankingMetric('valor'); 
         }
-
-        empresasAgrupadas[d.Empresa_Grupo].tpv += (d.TPV_Transacionado || 0);
-        empresasAgrupadas[d.Empresa_Grupo].vidas_elegiveis += (d.Vidas_Elegiveis || 0);
-        empresasAgrupadas[d.Empresa_Grupo].vidas_antecipando += (d.Vidas_Antecipando || 0);
-        empresasAgrupadas[d.Empresa_Grupo].vidas_com_conta += (d.Vidas_Com_Conta || 0);
-    });
-
-    const dadosFinais = Object.values(empresasAgrupadas);
-    currentChartData = dadosFinais;
-
-    let totalTpv = 0, totalElegiveis = 0, totalAntecipando = 0, totalComConta = 0;
-    dadosFinais.forEach(d => {
-        totalTpv += d.tpv;
-        totalElegiveis += d.vidas_elegiveis;
-        totalAntecipando += d.vidas_antecipando;
-        totalComConta += d.vidas_com_conta;
-    });
-
-    const ticketMedio = totalAntecipando > 0 ? totalTpv / totalAntecipando : 0;
-    const penetracaoMedia = totalElegiveis > 0 ? (totalAntecipando / totalElegiveis) * 100 : 0;
-
-    document.getElementById('kpi-tpv').innerText = formatMoney(totalTpv);
-    document.getElementById('kpi-ticket').innerText = formatMoney(ticketMedio);
-    document.getElementById('kpi-vidas-ant').innerText = totalAntecipando.toLocaleString('pt-BR');
-    document.getElementById('kpi-vidas-conta').innerText = `${totalComConta.toLocaleString('pt-BR')} de ${totalElegiveis.toLocaleString('pt-BR')} elegíveis`;
-    document.getElementById('kpi-penetracao').innerText = penetracaoMedia.toFixed(2).replace('.', ',') + '%';
-
-    const containerCards = document.getElementById('cards-empresas');
-    containerCards.innerHTML = '';
-    
-    const dadosParaCards = [...dadosFinais].sort((a,b) => {
-        let penA = a.vidas_elegiveis > 0 ? a.vidas_antecipando/a.vidas_elegiveis : 0;
-        let penB = b.vidas_elegiveis > 0 ? b.vidas_antecipando/b.vidas_elegiveis : 0;
-        return penB - penA;
-    });
-
-    dadosParaCards.forEach(d => {
-        if(d.vidas_elegiveis === 0 && d.tpv === 0) return; 
-        
-        const pen = d.vidas_elegiveis > 0 ? (d.vidas_antecipando / d.vidas_elegiveis) * 100 : 0;
-        containerCards.innerHTML += `
-            <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
-                <h4 class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider truncate" title="${d.nome}">${d.nome}</h4>
-                <p class="text-2xl font-bold text-primary mb-1">${pen.toFixed(2).replace('.', ',')}%</p>
-                <p class="text-xs text-slate-400">${d.vidas_antecipando.toLocaleString('pt-BR')} de ${d.vidas_elegiveis.toLocaleString('pt-BR')} Vidas</p>
-            </div>
-        `;
-    });
-
-    changeRankingMetric('valor'); 
-}
 
         function goHome() {
             document.getElementById('dashboard-view').classList.add('hidden');
