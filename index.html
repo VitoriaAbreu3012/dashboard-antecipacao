@@ -1137,12 +1137,8 @@ Mes	Empresa_Grupo	Setor	Vidas_Totais	Vidas_Elegiveis	Vidas_Com_Conta	Vidas_Antec
     <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
         <h4 class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider truncate" title="${d.nome}">${d.nome}</h4>
         <p class="text-2xl font-bold text-primary mb-1">${pen.toFixed(2).replace('.', ',')}%</p>
-        <p class="text-xs text-slate-400 mb-1">
-            ${d.vidas_antecipando.toLocaleString('pt-BR')} de ${d.vidas_elegiveis.toLocaleString('pt-BR')} vidas
-        </p>
-        <p class="text-xs text-slate-500 font-medium">
-            ${d.vidas_com_conta.toLocaleString('pt-BR')} vidas com conta
-        </p>
+        <p class="text-xs text-slate-400 mb-1">${d.vidas_antecipando.toLocaleString('pt-BR')} de ${d.vidas_elegiveis.toLocaleString('pt-BR')} vidas</p>
+        <p class="text-xs text-slate-500 font-medium">${d.vidas_com_conta.toLocaleString('pt-BR')} vidas com conta</p>
     </div>
 `;
             });
